@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
 import {Provider, connect} from 'react-redux';
-import * as thunk from 'redux-thunk';
+import ReduxThunk from 'redux-thunk';
 import './index.css';
 
-// const thunk = ReduxThunk.default;
+const thunk = ReduxThunk;
 
 function fetchPostsRequest(){
     return {
@@ -14,6 +14,7 @@ function fetchPostsRequest(){
 }
 
 function fetchPostsSuccess(payload) {
+    console.log(payload);
     return {
         type: "FETCH_SUCCESS",
         payload
@@ -31,7 +32,7 @@ const reducer = (state = {}, action) => {
         case "FETCH_REQUEST":
             return state;
         case "FETCH_SUCCESS":
-            return {...state, posts: action.payload};
+            return {...state, shows: action.payload};
         default:
             return state;
     }
@@ -40,7 +41,8 @@ const reducer = (state = {}, action) => {
 function fetchPostsWithRedux() {
     return (dispatch) => {
         dispatch(fetchPostsRequest());
-        return fetchPosts().then(([response, json]) =>{
+        return fetchPosts()
+            .then(([response, json]) =>{
             if(response.status === 200){
                 dispatch(fetchPostsSuccess(json))
             }
@@ -51,10 +53,18 @@ function fetchPostsWithRedux() {
     }
 }
 
-function fetchPosts() {
-    const URL = "https://jsonplaceholder.typicode.com/posts";
-    return fetch(URL, { method: 'GET'})
-        .then( response => Promise.all([response, response.json()]));
+function fetchPosts(input, init) {
+    const URL = "https://api.trakt.tv/search/show?extended=full&limit=10&query=";
+
+
+    return fetch(URL, {
+        headers: {
+            "Content-Type": "application/json",
+            "trakt-api-version": "2",
+            "trakt-api-key": "31f15cbdee3e55e2ceca6cd2e0e3ba9791b4f1feb1f7bab08c3d8ca6e018609a"
+        }
+    })
+    .then( response => Promise.all([response, response.json()]));
 }
 
 class App extends React.Component {
@@ -64,14 +74,16 @@ class App extends React.Component {
     render(){
         return (
             <table>
+                <tbody>
                 {
-                    this.props.posts &&
-                    this.props.posts.map((post) =>{
+                    this.props.shows &&
+                    this.props.shows.map((item) =>{
                         return(
-                            <tr>{post.title}</tr>
+                            <tr><td>{ item.show.title }</td><td>{ item.show.ids.tvdb }</td></tr>
                         )
                     })
                 }
+                </tbody>
             </table>
         )
     }
@@ -80,7 +92,7 @@ class App extends React.Component {
 
 function mapStateToProps(state){
     return {
-        posts: state.posts
+        shows: state.shows
     }
 }
 
@@ -89,8 +101,9 @@ let Container = connect(mapStateToProps, {fetchPostsWithRedux})(App);
 
 const store = createStore(
     reducer,
-    applyMiddleware(thunk.default)
+    applyMiddleware(thunk)
 );
+
 ReactDOM.render(
     <div>
     <Provider store={store}>
