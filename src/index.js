@@ -3,53 +3,119 @@ import ReactDOM from 'react-dom';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import {Provider, connect} from 'react-redux';
 import ReduxThunk from 'redux-thunk';
+import { createLogger } from 'redux-logger';
 import './index.css';
 
+const logger = createLogger();
+
 // action creators
-function fetchRequest(){
+function fetchShowsRequest(){
     return {
-        type: "FETCH_REQUEST"
+        type: "FETCH_SHOWS_REQUEST"
     }
 }
 
-function fetchSuccess(payload) {
-    console.log(payload);
+function fetchShowsSuccess(payload) {
+    // console.log(payload);
     return {
-        type: "FETCH_SUCCESS",
+        type: "FETCH_SHOWS_SUCCESS",
         payload
     }
 }
 
-function fetchError() {
+function fetchShowsError() {
     return {
-        type: "FETCH_ERROR"
+        type: "FETCH_SHOWS_ERROR"
+    }
+}
+
+function fetchPosterRequest(){
+    return {
+        type: "FETCH_POSTER_REQUEST"
+    }
+}
+
+function fetchPosterSuccess(payload) {
+    // console.log(payload);
+    return {
+        type: "FETCH_POSTER_SUCCESS",
+        payload
+    }
+}
+
+function fetchPosterError() {
+    return {
+        type: "FETCH_POSTER_ERROR"
     }
 }
 
 //reducers
 const posterReducer = (state = {}, action) => {
     switch (action.type) {
-        case "FETCH_REQUEST":
+        case "FETCH_POSTER_REQUEST":
             return state;
-        case "FETCH_SUCCESS":
+        case "FETCH_POSTER_SUCCESS":
+            // console.log(action.payload);
             return {...state, posters: action.payload};
         default:
             return state;
     }
 }
+const showsReducer = (state = {}, action) => {
+    switch (action.type) {
+        case "FETCH_SHOWS_REQUEST":
+            return state;
+        case "FETCH_SHOWS_SUCCESS":
+            return {...state, shows: action.payload};
+        default:
+            return state;
+    }
+}
+const rootReducer = combineReducers({
+    posterState: posterReducer,
+    showsState: showsReducer,
+});
 
+// async shows requests
+function fetchShowsWithRedux() {
+    return (dispatch) => {
+        dispatch(fetchShowsRequest());
+        return fetchShows()
+            .then(([response, json]) =>{
+                if(response.status === 200){
+                    dispatch(fetchShowsSuccess(json))
+                }
+                else{
+                    dispatch(fetchShowsError())
+                }
+            })
+    }
+}
 
-// async requests
+function fetchShows(input, init) {
+    const URL = "https://api.trakt.tv/search/show?extended=full&limit=10&query=";
+
+    return fetch(URL, {
+        headers: {
+            "Content-Type": "application/json",
+            "trakt-api-version": "2",
+            "trakt-api-key": "31f15cbdee3e55e2ceca6cd2e0e3ba9791b4f1feb1f7bab08c3d8ca6e018609a"
+        }
+    })
+        .then( response => Promise.all([response, response.json()]));
+}
+
+// async poster requests
 function fetchPosterWithRedux() {
     return (dispatch) => {
-        dispatch(fetchRequest());
+        dispatch(fetchPosterRequest());
         return fetchPoster()
             .then(([response, json]) =>{
                 if(response.status === 200){
-                    dispatch(fetchSuccess(json))
+                    dispatch(fetchPosterSuccess(json))
                 }
                 else{
-                    dispatch(fetchError())
+                    dispatch(fetchPosterError())
                 }
             })
     }
@@ -60,11 +126,9 @@ function getId(tmdbId) {
     return showId;
 }
 
-
 function fetchPoster(input, init) {
     const showId = getId();
     const URL = `http://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/v3/tv/${showId}?api_key=ab75dec43906f846e6200633b9ad43c7&&client_key=4c61b1676e8869c4553df95839f5a827`;
-
 
     return fetch(URL, {
         headers: {
@@ -78,12 +142,24 @@ function fetchPoster(input, init) {
 class App extends React.Component {
     componentDidMount(){
         this.props.fetchPosterWithRedux()
+        this.props.fetchShowsWithRedux()
+
+
     }
     render(){
-
+        console.log(this.props.posters);
+        console.log(this.props.shows);
+        // console.log(this.state);
         return (
             <table>
                 <tbody>
+                {
+                    this.props.shows &&
+                    this.props.shows.map((item) =>{
+                        return(
+                            <tr><td>{ item.show.title }</td><td>{ item.show.ids.tvdb }</td></tr>
+                        )
+                    })}
                 {
                     this.props.posters &&
                     <tr><td><img src={this.props.posters.tvthumb[0].url} alt={this.props.posters.tvthumb[0].url}></img></td></tr>
@@ -97,18 +173,20 @@ class App extends React.Component {
 
 
 function mapStateToProps(state){
+    // console.log(state)
     return {
-        posters: state.posters
+        posters: state.posterState.posters,
+        shows: state.showsState.shows
     }
 }
 
 
-let Container = connect(mapStateToProps, {fetchPosterWithRedux})(App);
+let Container = connect(mapStateToProps, {fetchPosterWithRedux, fetchShowsWithRedux})(App);
 
 // Redux store
 const store = createStore(
-    posterReducer,
-    applyMiddleware(ReduxThunk)
+    rootReducer,
+    applyMiddleware(logger, ReduxThunk)
 );
 
 // Rendering react elements
@@ -120,120 +198,3 @@ ReactDOM.render(
     </div>,
     document.getElementById('root')
 );
-
-
-
-
-
-// import React from 'react';
-// import ReactDOM from 'react-dom';
-// import { createStore, applyMiddleware } from 'redux';
-// import {Provider, connect} from 'react-redux';
-// import ReduxThunk from 'redux-thunk';
-// import './index.css';
-//
-// function fetchRequest(){
-//     return {
-//         type: "FETCH_REQUEST"
-//     }
-// }
-//
-// function fetchSuccess(payload) {
-//     console.log(payload);
-//     return {
-//         type: "FETCH_SUCCESS",
-//         payload
-//     }
-// }
-//
-// function fetchError() {
-//     return {
-//         type: "FETCH_ERROR"
-//     }
-// }
-//
-// const showsReducer = (state = {}, action) => {
-//     switch (action.type) {
-//         case "FETCH_REQUEST":
-//             return state;
-//         case "FETCH_SUCCESS":
-//             return {...state, shows: action.payload};
-//         default:
-//             return state;
-//     }
-// }
-//
-// function fetchShowsWithRedux() {
-//     return (dispatch) => {
-//         dispatch(fetchRequest());
-//         return fetchShows()
-//             .then(([response, json]) =>{
-//             if(response.status === 200){
-//                 dispatch(fetchSuccess(json))
-//             }
-//             else{
-//                 dispatch(fetchError())
-//             }
-//         })
-//     }
-// }
-//
-// function fetchShows(input, init) {
-//     const URL = "https://api.trakt.tv/search/show?extended=full&limit=10&query=";
-//
-//
-//     return fetch(URL, {
-//         headers: {
-//             "Content-Type": "application/json",
-//             "trakt-api-version": "2",
-//             "trakt-api-key": "31f15cbdee3e55e2ceca6cd2e0e3ba9791b4f1feb1f7bab08c3d8ca6e018609a"
-//         }
-//     })
-//     .then( response => Promise.all([response, response.json()]));
-// }
-//
-// class App extends React.Component {
-//     componentDidMount(){
-//         this.props.fetchShowsWithRedux()
-//     }
-//     render(){
-//         return (
-//             <table>
-//                 <tbody>
-//                 {
-//                     this.props.shows &&
-//                     this.props.shows.map((item) =>{
-//                         return(
-//                             <tr><td>{ item.show.title }</td><td>{ item.show.ids.tvdb }</td></tr>
-//                         )
-//                     })
-//                 }
-//                 </tbody>
-//             </table>
-//         )
-//     }
-// }
-//
-//
-// function mapStateToProps(state){
-//     return {
-//         shows: state.shows
-//     }
-// }
-//
-//
-// let Container = connect(mapStateToProps, {fetchShowsWithRedux})(App);
-//
-// const store = createStore(
-//     reducer,
-//     applyMiddleware(ReduxThunk)
-// );
-//
-// ReactDOM.render(
-//     <div>
-//     <Provider store={store}>
-//         <Container/>
-//     </Provider>
-//     </div>,
-//     document.getElementById('root')
-// );
