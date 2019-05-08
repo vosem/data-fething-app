@@ -4,6 +4,7 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 import {Provider, connect} from 'react-redux';
 import ReduxThunk from 'redux-thunk';
 import { createLogger } from 'redux-logger';
+import Show from './components/Show';
 import './index.css';
 
 const logger = createLogger();
@@ -16,7 +17,6 @@ function fetchShowsRequest(){
 }
 
 function fetchShowsSuccess(payload) {
-    // console.log(payload);
     return {
         type: "FETCH_SHOWS_SUCCESS",
         payload
@@ -43,20 +43,37 @@ function fetchPosterSuccess(payload) {
     }
 }
 
+// function createPosterUrl(payload) {
+//     // console.log(payload);
+//     return {
+//         type: "CREATE_POSTER_URL",
+//         payload
+//     }
+// }
+
 function fetchPosterError() {
     return {
         type: "FETCH_POSTER_ERROR"
     }
 }
 
+
 //reducers
+// const posterUrlReducer = (state = {}, action) => {
+//     switch (action.type) {
+//         case "CREATE_POSTER_URL":
+//             return {...state, posterUrls: action.payload};
+//         default:
+//             return state;
+//     }
+// }
 const posterReducer = (state = {}, action) => {
     switch (action.type) {
         case "FETCH_POSTER_REQUEST":
             return state;
         case "FETCH_POSTER_SUCCESS":
             // console.log(action.payload);
-            return {...state, posters: action.payload};
+            return {...state, poster: action.payload};
         default:
             return state;
     }
@@ -89,6 +106,7 @@ function fetchShowsWithRedux() {
                     dispatch(fetchShowsError())
                 }
             })
+
     }
 }
 
@@ -141,25 +159,21 @@ function fetchPoster(input, init) {
 // React presentational component
 class App extends React.Component {
     componentDidMount(){
-        this.props.fetchPosterWithRedux()
+        // this.props.fetchPosterWithRedux()
         this.props.fetchShowsWithRedux()
-
-
     }
+
     render(){
-        console.log(this.props.posters);
-        console.log(this.props.shows);
-        // console.log(this.state);
+        // console.log(this.props.posters);
         return (
             <table>
                 <tbody>
-                {
-                    this.props.shows &&
-                    this.props.shows.map((item) =>{
-                        return(
-                            <tr><td>{ item.show.title }</td><td>{ item.show.ids.tvdb }</td></tr>
-                        )
-                    })}
+                {(this.props.shows || []).map(show =>
+                    <Show
+                        key={show.show.ids.tvdb}
+                        show={show.show}
+                    />
+                )}
                 {
                     this.props.posters &&
                     <tr><td><img src={this.props.posters.tvthumb[0].url} alt={this.props.posters.tvthumb[0].url}></img></td></tr>
@@ -175,13 +189,15 @@ class App extends React.Component {
 function mapStateToProps(state){
     // console.log(state)
     return {
-        posters: state.posterState.posters,
+        // posters: state.posterState.posters,
         shows: state.showsState.shows
     }
 }
 
 
-let Container = connect(mapStateToProps, {fetchPosterWithRedux, fetchShowsWithRedux})(App);
+let Container = connect(mapStateToProps, {fetchPosterWithRedux, fetchShowsWithRedux})(App, Show);
+// let ShowsContainer = connect(mapStateToProps, {fetchShowsWithRedux})(App);
+// let PosterContainer = connect(mapStateToProps, {fetchPosterWithRedux})(Show);
 
 // Redux store
 const store = createStore(
