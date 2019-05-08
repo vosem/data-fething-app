@@ -73,7 +73,15 @@ const posterReducer = (state = {}, action) => {
             return state;
         case "FETCH_POSTER_SUCCESS":
             // console.log(action.payload);
-            return {...state, poster: action.payload};
+            // return {...state, poster: action.payload};
+            return Object.assign({}, state, {
+                posters: [
+                    ...state.posters || [],
+                    {
+                        poster: action.payload
+                    }
+                ]
+            });
         default:
             return state;
     }
@@ -94,18 +102,48 @@ const rootReducer = combineReducers({
 });
 
 // async shows requests
+// function fetchShowsWithRedux() {
+//     return (dispatch) => {
+//         dispatch(fetchShowsRequest());
+//         return fetchShows()
+//             .then(([response, json]) =>{        // why array?
+//
+//                 if(response.status === 200){
+//                     dispatch(fetchShowsSuccess(json))
+//                 }
+//                 else{
+//                     dispatch(fetchShowsError())
+//                 }
+//             })
+//             // .then((response, json) => {
+//                     // console.log(json);
+//             // })
+//
+//     }
+// }
 function fetchShowsWithRedux() {
     return (dispatch) => {
-        dispatch(fetchShowsRequest());
+        // dispatch(fetchShowsRequest());
         return fetchShows()
-            .then(([response, json]) =>{
-                if(response.status === 200){
-                    dispatch(fetchShowsSuccess(json))
+            .then((response) =>{        // why array?
+                // console.log(response);
+                if(response !== 'undefined'){
+                    dispatch(fetchShowsSuccess(response))
                 }
                 else{
                     dispatch(fetchShowsError())
                 }
             })
+        // .then((response) => {
+        //
+        // console.log(response);
+        // console.log(store.getState().showsState.shows);
+        // for(let i = 0; i < store.getState().showsState.shows.length; i++){
+        //     console.log(i);
+        //     fetchPosterWithRedux();         //does not work
+        //
+        // }
+        // })
 
     }
 }
@@ -120,15 +158,20 @@ function fetchShows(input, init) {
             "trakt-api-key": "31f15cbdee3e55e2ceca6cd2e0e3ba9791b4f1feb1f7bab08c3d8ca6e018609a"
         }
     })
-        .then( response => Promise.all([response, response.json()]));
+        // .then( response => Promise.all([response, response.json()]));       // what is this for?
+        .then( response => response.json())       // what is this for?
+        // .then( response => console.log(response));       // what is this for?
 }
 
 // async poster requests
 function fetchPosterWithRedux() {
+    console.log('fetchPosterWithRedux');
     return (dispatch) => {
-        dispatch(fetchPosterRequest());
-        return fetchPoster()
+        console.log('posterReduxThunk');
+        // dispatch(fetchPosterRequest());
+        return fetchPoster(dispatch)
             .then(([response, json]) =>{
+
                 if(response.status === 200){
                     dispatch(fetchPosterSuccess(json))
                 }
@@ -145,6 +188,7 @@ function getId(tmdbId) {
 }
 
 function fetchPoster(input, init) {
+    console.log('fetchPoster');
     const showId = getId();
     const URL = `http://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/v3/tv/${showId}?api_key=ab75dec43906f846e6200633b9ad43c7&&client_key=4c61b1676e8869c4553df95839f5a827`;
 
@@ -160,19 +204,37 @@ function fetchPoster(input, init) {
 class App extends React.Component {
     componentDidMount(){
         // this.props.fetchPosterWithRedux()
-        this.props.fetchShowsWithRedux()
+        this.props.fetchShowsWithRedux();
+        // let pr = new Promise((resolve, reject) =>{
+        //     ss();
+        //     console.log(store.getState());
+        //     for(let i = 0; i < store.getState().showsState.shows.length; i++){
+        //         console.log(i);
+        //         this.props.fetchPosterWithRedux();         //does not work
+        //
+        //     }
+        // });
+
+
     }
 
     render(){
-        // console.log(this.props.posters);
+
+        console.log(this.props.posterState);
+        let i = -1;
         return (
             <table>
                 <tbody>
-                {(this.props.shows || []).map(show =>
-                    <Show
-                        key={show.show.ids.tvdb}
-                        show={show.show}
-                    />
+                {(this.props.shows || []).map(show => {
+
+                    ++i;
+                       return <Show
+                            key={show.show.ids.tvdb}
+                            key={i}
+                            showId={i}
+                            show={show.show}
+                        />
+                    }
                 )}
                 {
                     this.props.posters &&
@@ -195,7 +257,7 @@ function mapStateToProps(state){
 }
 
 
-let Container = connect(mapStateToProps, {fetchPosterWithRedux, fetchShowsWithRedux})(App, Show);
+let Container = connect(mapStateToProps, {/*fetchPosterWithRedux,*/ fetchShowsWithRedux})(App, Show);
 // let ShowsContainer = connect(mapStateToProps, {fetchShowsWithRedux})(App);
 // let PosterContainer = connect(mapStateToProps, {fetchPosterWithRedux})(Show);
 

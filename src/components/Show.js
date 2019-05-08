@@ -1,40 +1,49 @@
 import React from 'react';
-import {Provider, connect} from 'react-redux';
-// import {connect} from 'react-redux';
+import ReactDOM from 'react-dom';
+import {connect} from 'react-redux';
+
 let posterUrl = '';
+let posterId = 0;
 const createPosterUrl = (posterId) =>{
 
     posterUrl = `http://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/v3/tv/${posterId}?api_key=ab75dec43906f846e6200633b9ad43c7&&client_key=4c61b1676e8869c4553df95839f5a827`;
-    console.log(posterUrl);
+    // console.log(posterUrl);
     return posterUrl;
 };
-let posterId = 0;
-let posters = [];
+// let idd = -1;
+
 class Show extends React.Component {
+    // constructor(props) {
+    //     super();
+    //     this.showId = props.showId;
+    // }
+
     componentDidMount(){
         posterId=this.props.show.ids.tvdb;
         createPosterUrl(this.props.show.ids.tvdb);
         this.props.fetchPosterWithRedux();
+
     }
 
-
-
-
-
     render() {
+        this.props.posters && this.props.posters[this.props.showId] && this.props.posters[this.props.showId].poster &&
+        console.log(this.props.posters[this.props.showId].poster.tvthumb[0].url);
 
-        // createPosterUrl(this.props.show.ids.tvdb);
-        // console.log(this.props.show.ids.tvdb);
+        if (this.props.posters) {
+            for (let i = 0; i < this.props.posters.length; i++) {
+
+            }
+        }
 
 
             return (
 
                 <tr className="show">
-                    <td className="poster">{this.props.show.ids.tvdb}</td>
-
+                    <td className="key">{this.props.showId}</td>
+                    <td className="id">{this.props.show.ids.tvdb}</td>
                     {
-                        this.props.poster &&
-                        <td><img src={this.props.poster.tvthumb[0].url} alt={this.props.poster.tvbanner[0].url} height="50px"></img></td>
+                        this.props.posters && this.props.posters[this.props.showId] && this.props.posters[this.props.showId].poster &&
+                        <td><img src={this.props.posters[this.props.showId].poster.tvthumb[0].url} alt={this.props.posters[this.props.showId].poster.tvthumb[0].url} height="50px"></img></td>
 
                     }
                     <td className="posterImage"></td>
@@ -45,15 +54,6 @@ class Show extends React.Component {
     }
 }
 
-// const mapStateToProps = (state) => {
-//     return {
-//         posters: state.posterState.posters
-//     };
-// };
-// export default connect(mapStateToProps)(Show);
-
-// export default Show;
-
 function fetchPosterRequest(){
     return {
         type: "FETCH_POSTER_REQUEST"
@@ -61,20 +61,11 @@ function fetchPosterRequest(){
 }
 
 function fetchPosterSuccess(payload) {
-    // console.log(payload);
     return {
         type: "FETCH_POSTER_SUCCESS",
         payload
     }
 }
-
-// function createPosterUrl(payload) {
-//     // console.log(payload);
-//     return {
-//         type: "CREATE_POSTER_URL",
-//         payload
-//     }
-// }
 
 function fetchPosterError() {
     return {
@@ -102,7 +93,7 @@ function fetchPoster(input, init) {
 }
 function fetchPosterWithRedux() {
     return (dispatch) => {
-        dispatch(fetchPosterRequest());
+        // dispatch(fetchPosterRequest());
         return fetchPoster()
             .then(([response, json]) =>{
                 if(response.status === 200){
@@ -116,9 +107,8 @@ function fetchPosterWithRedux() {
 }
 
 function mapStateToProps(state){
-    // console.log(state)
     return {
-        poster: state.posterState.poster
+        posters: state.posterState.posters
         // shows: state.showsState.shows
     }
 }
