@@ -9,13 +9,7 @@ import './index.css';
 
 const logger = createLogger();
 
-// action creators
-// function fetchShowsRequest(){
-//     return {
-//         type: "FETCH_SHOWS_REQUEST"
-//     }
-// }
-
+///////////////////////////////// actionCreators ///////////////////////////////
 function fetchShowsSuccess(payload) {
     return {
         type: "FETCH_SHOWS_SUCCESS",
@@ -29,27 +23,12 @@ function fetchShowsError() {
     }
 }
 
-// function fetchPosterRequest(){
-//     return {
-//         type: "FETCH_POSTER_REQUEST"
-//     }
-// }
-
 function fetchPosterSuccess(payload) {
-    // console.log(payload);
     return {
         type: "FETCH_POSTER_SUCCESS",
         payload
     }
 }
-
-// function createPosterUrl(payload) {
-//     // console.log(payload);
-//     return {
-//         type: "CREATE_POSTER_URL",
-//         payload
-//     }
-// }
 
 function fetchPosterError() {
     return {
@@ -63,17 +42,7 @@ function addItem(payload) {
     }
 }
 
-//reducers
-// const posterUrlReducer = (state = {}, action) => {
-//     switch (action.type) {
-//         case "CREATE_POSTER_URL":
-//             return {...state, posterUrls: action.payload};
-//         default:
-//             return state;
-//     }
-// }
-// const items = [1, 2];
-
+//////////////////////////////// reducers ///////////////////////////////////////
 function itemsReducer (state = {}, action) {
     switch (action.type) {
         case 'ADD_ITEM':
@@ -85,15 +54,12 @@ function itemsReducer (state = {}, action) {
                     }
                 ]
             });
-
         default:
             return state;
     }
 }
 const posterReducer = (state = {}, action) => {
     switch (action.type) {
-        case "FETCH_POSTER_REQUEST":
-            return state;
         case "FETCH_POSTER_SUCCESS":
             // console.log(action.payload);
             // return {...state, poster: action.payload};
@@ -111,8 +77,6 @@ const posterReducer = (state = {}, action) => {
 }
 const showsReducer = (state = {}, action) => {
     switch (action.type) {
-        case "FETCH_SHOWS_REQUEST":
-            return state;
         case "FETCH_SHOWS_SUCCESS":
             return {...state, shows: action.payload};
         default:
@@ -120,12 +84,12 @@ const showsReducer = (state = {}, action) => {
     }
 }
 const rootReducer = combineReducers({
-    posterState: posterReducer,
+    postersState: posterReducer,
     showsState: showsReducer,
     itemsState: itemsReducer
 });
 
-// async shows requests
+/////////////////////////////// async shows requests ///////////////////////////
 // function fetchShowsWithRedux() {
 //     return (dispatch) => {
 //         dispatch(fetchShowsRequest());
@@ -184,20 +148,17 @@ function fetchShows(input, init) {
     })
         // .then( response => Promise.all([response, response.json()]));
         .then( response => response.json())
-        // .then( response => console.log(response));
 }
 
-// async poster requests
+/////////////////////// async poster requests ////////////////////
 function fetchPosterWithRedux() {
     console.log('fetchPosterWithRedux');
-    // console.log(showId);
     return (dispatch) => {
         console.log('posterReduxThunk');
-        // dispatch(fetchPosterRequest());
         return fetchPoster(dispatch)
             .then(([response, json]) =>{
-                console.log('posterReduxThunk');
                 if(response.status === 200){
+                    console.log('dispatch fetchPosterSuccess');
                     dispatch(fetchPosterSuccess(json))
                 }
                 else{
@@ -206,6 +167,7 @@ function fetchPosterWithRedux() {
             })
     }
 }
+
 let showId = 0;
 function getId(tvdbId) {
     showId = tvdbId;
@@ -214,8 +176,6 @@ function getId(tvdbId) {
 
 function fetchPoster(input, init) {
     console.log('fetchPoster');
-    // console.log(showId);
-    // const showId = getId(store.getState().showsState.shows[i].show.ids.tvdb);
     const URL = `http://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/v3/tv/${showId}?api_key=ab75dec43906f846e6200633b9ad43c7&&client_key=4c61b1676e8869c4553df95839f5a827`;
 
     return fetch(URL, {
@@ -227,59 +187,45 @@ function fetchPoster(input, init) {
 }
 
 function addItems(showId) {
-    console.log('addItems');
-    console.log(showId);
-
-        return addItem(showId);
+    return addItem(showId);
 
 }
 
-// React presentational component
+///////////////////////// React component //////////////////////
+
 class App extends React.Component {
     componentDidMount(){
-        // this.props.fetchPosterWithRedux()
         this.props.fetchShowsWithRedux()
             .then(() => {
-                for(let i = 0; i < store.getState().showsState.shows.length; i++){
-                    this.props.addItems(store.getState().showsState.shows[i].show.ids.tvdb);
+                for(let i = 0; i < this.props.shows.length; i++){
+                    this.props.addItems(this.props.shows[i].show.ids.tvdb);
                 }
             })
             .then(() => {
-                    for(let i = 0; i < store.getState().showsState.shows.length; i++){
+                    for(let i = 0; i < this.props.shows.length; i++){
                         console.log(i);
-                        // this.props.fetchPosterWithRedux();
-                        // console.log(showId);
+                        getId(store.getState().showsState.shows[i].show.ids.tvdb);
+                        this.props.fetchPosterWithRedux();
                     }
             })
-
-
     }
 
     render(){
 
-        console.log(this.props.posterState);
-        let i = -1;
+        let i = 0;
         return (
             <table>
                 <tbody>
                 {(this.props.shows || []).map(show => {
-console.log(show.show.ids.tvdb);
-console.log(this.props.posters);
-                        // let index = this.props.shows.indexOf(show.show.ids.tvdb.parentElement)
-                        // console.log(index);
                     ++i;
                        return <Show
                             key={i}
+                            showNumber={i}
                             showId={show.show.ids.tvdb}
                             show={show.show}
                         />
                     }
                 )}
-                {
-                    // this.props.posters &&
-                    // <tr><td><img src={this.props.posters.tvthumb[0].url} alt={this.props.posters.tvthumb[0].url}></img></td></tr>
-
-                }
                 </tbody>
             </table>
         )
@@ -288,24 +234,22 @@ console.log(this.props.posters);
 
 
 function mapStateToProps(state){
-    // console.log(state)
     return {
-        // posters: state.posterState.posters,
+        posters: state.postersState.posters,
         shows: state.showsState.shows,
         items: state.itemsState.items
     }
 }
 
-
 let Container = connect(mapStateToProps, {fetchPosterWithRedux, fetchShowsWithRedux, addItems})(App);
 
-// Redux store
+/////////////////////////////////// Redux store ////////////////////////////////
 const store = createStore(
     rootReducer,
     applyMiddleware(logger, ReduxThunk)
 );
 
-// Rendering react elements
+////////////////////////////// Rendering react elements ////////////////////////
 ReactDOM.render(
     <div>
         <Provider store={store}>
