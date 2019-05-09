@@ -13,10 +13,9 @@ const createPosterUrl = (posterId) =>{
 // let idd = -1;
 
 class Show extends React.Component {
-    // constructor(props) {
-    //     super();
-    //     this.showId = props.showId;
-    // }
+    constructor(props) {
+        super(props);
+    }
 
     componentDidMount(){
         posterId=this.props.show.ids.tvdb;
@@ -108,7 +107,7 @@ function fetchPosterWithRedux() {
 
 function mapStateToProps(state){
     return {
-        posters: state.posterState.posters
+        posters: state.posterState.posters,
         // shows: state.showsState.shows
     }
 }
