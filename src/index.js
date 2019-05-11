@@ -6,10 +6,12 @@ import ReduxThunk from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 import Show from './components/Show';
 import './index.css';
+import TitleSearch from "./components/TitleSearch";
 
 const logger = createLogger();
 
 ///////////////////////////////// actionCreators ///////////////////////////////
+
 function fetchShowsSuccess(payload) {
     return {
         type: "FETCH_SHOWS_SUCCESS",
@@ -22,6 +24,13 @@ function fetchShowsError() {
         type: "FETCH_SHOWS_ERROR"
     }
 }
+
+// function searchShowsSuccess(payload) {
+//     return {
+//         type: "SEARCH_SHOWS_SUCCESS",
+//         payload
+//     }
+// }
 
 function fetchPosterSuccess(payload) {
     return {
@@ -78,6 +87,8 @@ const posterReducer = (state = {}, action) => {
 const showsReducer = (state = {}, action) => {
     switch (action.type) {
         case "FETCH_SHOWS_SUCCESS":
+            return {...state, shows: action.payload};
+        case "SEARCH_SHOWS_SUCCESS":
             return {...state, shows: action.payload};
         default:
             return state;
@@ -204,7 +215,7 @@ class App extends React.Component {
             .then(() => {
                     for(let i = 0; i < this.props.shows.length; i++){
                         console.log(i);
-                        getId(store.getState().showsState.shows[i].show.ids.tvdb);
+                        getId(this.props.shows[i].show.ids.tvdb);
                         this.props.fetchPosterWithRedux();
                     }
             })
@@ -216,6 +227,16 @@ class App extends React.Component {
         return (
             <table>
                 <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <TitleSearch />
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
                 {(this.props.shows || []).map(show => {
                     ++i;
                        return <Show
