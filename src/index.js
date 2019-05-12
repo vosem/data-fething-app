@@ -25,13 +25,6 @@ function fetchShowsError() {
     }
 }
 
-// function searchShowsSuccess(payload) {
-//     return {
-//         type: "SEARCH_SHOWS_SUCCESS",
-//         payload
-//     }
-// }
-
 function fetchPosterSuccess(payload) {
     return {
         type: "FETCH_POSTER_SUCCESS",
@@ -70,8 +63,6 @@ function itemsReducer (state = {}, action) {
 const posterReducer = (state = {}, action) => {
     switch (action.type) {
         case "FETCH_POSTER_SUCCESS":
-            // console.log(action.payload);
-            // return {...state, poster: action.payload};
             return Object.assign({}, state, {
                 posters: [
                     ...state.posters || [],
@@ -101,51 +92,73 @@ const rootReducer = combineReducers({
 });
 
 /////////////////////////////// async shows requests ///////////////////////////
-// function fetchShowsWithRedux() {
-//     return (dispatch) => {
-//         dispatch(fetchShowsRequest());
-//         return fetchShows()
-//             .then(([response, json]) =>{
-//
-//                 if(response.status === 200){
-//                     dispatch(fetchShowsSuccess(json))
-//                 }
-//                 else{
-//                     dispatch(fetchShowsError())
-//                 }
-//             })
-//             // .then((response, json) => {
-//                     // console.log(json);
-//             // })
-//
-//     }
-// }
+
 function fetchShowsWithRedux() {
     return (dispatch) => {
         // dispatch(fetchShowsRequest());
         return fetchShows()
             .then((response) =>{
-                // console.log(response);
                 if(response !== 'undefined'){
                     dispatch(fetchShowsSuccess(response))
                 }
                 else{
                     dispatch(fetchShowsError())
                 }
+                return response;
             })
-        // .then((response) => {
-        //
-        // console.log(response);
-        // console.log(store.getState().showsState.shows);
-        // for(let i = 0; i < store.getState().showsState.shows.length; i++){
-        //     console.log(i);
-        //     fetchPosterWithRedux();         //does not work
-        //
-        // }
-        // })
-
+            // .then((response) => {            // fetchPosterWithRedux() -> return does not work
+            //     console.log('!!!!', response);
+            //     console.log(store.getState().showsState.shows);
+            //     for(let i = 0; i < store.getState().showsState.shows.length; i++){
+            //         console.log(i);
+            //         getId(store.getState().showsState.shows[i].show.ids.tvdb);
+            //         fetchPosterWithRedux();
+            //     }
+            // });
     }
 }
+
+// function fetchShows(input, init) {
+//     return new Promise((resolve, reject) => {
+//         const URL = "https://api.trakt.tv/search/show?extended=full&limit=10&query=";
+//         const req = new XMLHttpRequest();
+//         req.open('GET', URL, true);
+//         const headers = {
+//             "Content-Type": "application/json",
+//             "trakt-api-version": "2",
+//             "trakt-api-key": "31f15cbdee3e55e2ceca6cd2e0e3ba9791b4f1feb1f7bab08c3d8ca6e018609a"
+//         };
+//         Object.keys(headers).forEach(key => req.setRequestHeader(key, headers[key]));
+//         req.onreadystatechange = () => {
+//             if (req.readyState != req.DONE) {
+//                 console.log(`readyState = ${req.readyState}`);
+//             } else if (req.status == 200) {
+//                 // try {
+//                 //     const res = JSON.parse(req.responseText);
+//                 //     console.log(res);
+//                 //     resolve(res);
+//                 // } catch (e) {
+//                 //     console.log(`Error: ${e}!!! ${req.responseText}`);
+//                 //     reject();
+//                 // }
+//                 resolve(req.responseText);
+//             } else {
+//                 console.log(`Error!!!`);
+//                 reject(req.status);
+//             }
+//         }
+//         req.send();
+//     }).then(res => {
+//         try {
+//             res = JSON.parse(res);
+//             console.log(res);
+//             return Promise.resolve(res);
+//         } catch (e) {
+//             console.log(`Error: ${e}!!! ${res}`);
+//             return Promise.reject(e);
+//         }
+//     });
+// }
 
 function fetchShows(input, init) {
     const URL = "https://api.trakt.tv/search/show?extended=full&limit=10&query=";
@@ -165,11 +178,11 @@ function fetchShows(input, init) {
 function fetchPosterWithRedux() {
     console.log('fetchPosterWithRedux');
     return (dispatch) => {
-        console.log('posterReduxThunk');
+        console.log('dispatch posterReduxThunk');
         return fetchPoster(dispatch)
             .then(([response, json]) =>{
                 if(response.status === 200){
-                    console.log('dispatch fetchPosterSuccess');
+                    // console.log('fetchPosterSuccess');
                     dispatch(fetchPosterSuccess(json))
                 }
                 else{
@@ -186,7 +199,7 @@ function getId(tvdbId) {
 }
 
 function fetchPoster(input, init) {
-    console.log('fetchPoster');
+    // console.log('fetchPoster');
     const URL = `http://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/v3/tv/${showId}?api_key=ab75dec43906f846e6200633b9ad43c7&&client_key=4c61b1676e8869c4553df95839f5a827`;
 
     return fetch(URL, {

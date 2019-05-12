@@ -10,24 +10,16 @@ export function searchShowsSuccess(payload) {
     }
 }
 
-function searchByTitle(event) {              // can't use inside of class
+function searchByTitle(event) {
 
-    // event.nativeEvent.preventDefault();                 // doesn't prevent reload
-    // event.nativeEvent.stopPropagation();                 // doesn't prevent reload
-    // event.nativeEvent.stopImmediatePropagation();        // doesn't prevent reload
     // if (event.keyCode === 13) {
-    // event.target &&
-    console.log(event.target.value);
 
     if(event.target) {
         TitleSearchValue = event.target.value;
-        console.log(event.target.value);
-        return (dispatch) => {
-            console.log('searchShowsThunk');
-            return searchShows()
 
+        return (dispatch) => {
+            return searchShows()
                 .then((response) => {
-                    // console.log(response);
                     if (response !== 'undefined') {
                         dispatch(searchShowsSuccess(response))
                     } else {
@@ -37,15 +29,10 @@ function searchByTitle(event) {              // can't use inside of class
         }
     }
     // }
-    // return false;                 // doesn't prevent reload
 }
 
 function searchShows(input, init) {
-    console.log('searchShows');
-    // const URL = `https://api.trakt.tv/search/show?extended=full&limit=10&query=,title=${TitleSearchValue}`;
-    const URL = `https://api.trakt.tv/search/show?extended=full&limit=10&query=${TitleSearchValue}&show.title=${TitleSearchValue}&year=2008`;
-    // const URL = `https://api.trakt.tv/search/show?extended=full&limit=10&query=tron&title=tron`;
-    // const URL = `https://api.trakt.tv/shows/popular?extended=full&limit=10&title=${TitleSearchValue}`;
+    const URL = `https://api.trakt.tv/search/show?extended=full&limit=10&query=${TitleSearchValue}&fields=title`;
 
     return fetch(URL, {
         headers: {
@@ -70,14 +57,19 @@ function mapStateToProps(state){
     }
 }
 
+
+
 class TitleSearch extends React.Component {
+
+    handleSubmit(event){
+        event.preventDefault();
+    }
 
     componentDidMount(){}
 
     render() {
-        console.log('this.props ' + this.props.onKeyUp)
         return (
-            <form action="#">
+            <form action="" onSubmit={this.handleSubmit}>
                 <input
                     type="text"
                     placeholder="Title"
