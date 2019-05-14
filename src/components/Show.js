@@ -3,14 +3,13 @@ import {connect} from 'react-redux';
 import './Show.css';
 import no_poster from '../assets/no_poster.jpg';
 
-let posterUrl,
-    posterAlt;
-
 class Show extends React.Component {
 
     componentDidMount(){}
 
     render() {
+        let posterUrl,
+            posterAlt;
         if (this.props.posters) {
             posterUrl = this.props.posters.filter(poster => {
                 return poster.poster.thetvdb_id === this.props.showId.toString();
@@ -47,8 +46,7 @@ class Show extends React.Component {
 function mapStateToProps(state){
     return {
         posters: state.postersState.posters,
-        shows: state.showsState.shows,
-        items: state.itemsState.items
+        shows: state.showsState.shows
     }
 }
 export default connect(mapStateToProps)(Show);

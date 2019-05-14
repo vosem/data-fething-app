@@ -1,104 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import store from './store/index';
 import {Provider, connect} from 'react-redux';
-import ReduxThunk from 'redux-thunk';
-import { createLogger } from 'redux-logger';
+import { fetchShowsSuccess, fetchShowsError, fetchPosterSuccess, fetchPosterError } from './actions/actions';
 import Show from './components/Show';
+import SearchByTitle from "./components/SearchByTitle";
+import SearchByYear from "./components/SearchByYear";
+import SortShows from "./components/SortShows";
 import './index.css';
-import TitleSearch from "./components/TitleSearch";
-
-const logger = createLogger();
-
-///////////////////////////////// actionCreators ///////////////////////////////
-
-function fetchShowsSuccess(payload) {
-    return {
-        type: "FETCH_SHOWS_SUCCESS",
-        payload
-    }
-}
-
-function fetchShowsError() {
-    return {
-        type: "FETCH_SHOWS_ERROR"
-    }
-}
-
-function fetchPosterSuccess(payload) {
-    return {
-        type: "FETCH_POSTER_SUCCESS",
-        payload
-    }
-}
-
-function fetchPosterError() {
-    return {
-        type: "FETCH_POSTER_ERROR"
-    }
-}
-function addItem(payload) {
-    return {
-        type: "ADD_ITEM",
-        payload
-    }
-}
-
-//////////////////////////////// reducers ///////////////////////////////////////
-function itemsReducer (state = {}, action) {
-    switch (action.type) {
-        case 'ADD_ITEM':
-            return Object.assign({}, state, {
-                items: [
-                    ...state.items || [],
-                    {
-                        item: action.payload
-                    }
-                ]
-            });
-        default:
-            return state;
-    }
-}
-const posterReducer = (state = {}, action) => {
-    switch (action.type) {
-        case "FETCH_POSTER_SUCCESS":
-            return Object.assign({}, state, {
-                posters: [
-                    ...state.posters || [],
-                    {
-                        poster: action.payload
-                    }
-                ]
-            });
-        default:
-            return state;
-    }
-}
-const showsReducer = (state = {}, action) => {
-    switch (action.type) {
-        case "FETCH_SHOWS_SUCCESS":
-            return {...state, shows: action.payload};
-        case "SEARCH_SHOWS_SUCCESS":
-            return {...state, shows: action.payload};
-        default:
-            return state;
-    }
-}
-const rootReducer = combineReducers({
-    postersState: posterReducer,
-    showsState: showsReducer,
-    itemsState: itemsReducer
-});
 
 /////////////////////////////// async shows requests ///////////////////////////
 
 function fetchShowsWithRedux() {
     return (dispatch) => {
         // dispatch(fetchShowsRequest());
+
         return fetchShows()
             .then((response) =>{
                 if(response !== 'undefined'){
+                    // console.log(response);
                     dispatch(fetchShowsSuccess(response))
                 }
                 else{
@@ -160,8 +80,33 @@ function fetchShowsWithRedux() {
 //     });
 // }
 
-function fetchShows(input, init) {
-    const URL = "https://api.trakt.tv/search/show?extended=full&limit=10&query=";
+function generateShowsUrl (){
+    let URL, titleQuery, yearQuery, sortingQuery;
+
+    if(store.getState().queryState.queries) {
+        titleQuery = store.getState().queryState.queries.title;
+        yearQuery = store.getState().queryState.queries.year;
+        sortingQuery = store.getState().queryState.queries.sorting;
+    }
+
+    if(store.getState().queryState.queries && titleQuery === undefined) titleQuery = '';
+    if(store.getState().queryState.queries && yearQuery === undefined) yearQuery = '';
+
+    if (store.getState().queryState.queries) {
+        if(store.getState().queryState.queries.sorting === 'popular') {
+            URL = `https://api.trakt.tv/search/show?extended=full&limit=10&query=${titleQuery}${yearQuery}`
+        }
+        else URL = `https://api.trakt.tv/shows/${sortingQuery}?extended=full&limit=10&query=${titleQuery}${yearQuery}`;
+        console.log(URL);
+    }else {
+        URL = `https://api.trakt.tv/search/show?extended=full&limit=10&query=`;
+    }
+    return URL;
+}
+
+ function fetchShows() {
+
+    let URL = generateShowsUrl();
 
     return fetch(URL, {
         headers: {
@@ -176,9 +121,9 @@ function fetchShows(input, init) {
 
 /////////////////////// async poster requests ////////////////////
 function fetchPosterWithRedux() {
-    console.log('fetchPosterWithRedux');
+    // console.log('fetchPosterWithRedux');
     return (dispatch) => {
-        console.log('dispatch posterReduxThunk');
+        // console.log('dispatch posterReduxThunk');
         return fetchPoster(dispatch)
             .then(([response, json]) =>{
                 if(response.status === 200){
@@ -198,36 +143,52 @@ function getId(tvdbId) {
     return showId;
 }
 
+// function getToken() {
+//
+//     const URL = `https://api.thetvdb.com/login`;
+//
+//     return fetch(URL, {
+//         headers: {
+//             "Content-Type": "application/json",
+//             Accept: "application/json",
+//             // "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTc5MDE4MDcsImlkIjoiZGF0YS1mZXRjaGluZy1hcHAiLCJvcmlnX2lhdCI6MTU1NzgxNTQwNywidXNlcmlkIjo1Mjc5NTIsInVzZXJuYW1lIjoiYW5uYS5wb3BvdnNrYS5maXJlZmx5YjM2In0.nBj-hDm7l4eLQHxCjhiNLc8UeZQZseiw5fKNpssGm1gF8twwGHsOjA7ra7qGZDMwKwo6sLw9egVw2jPUR4xV_WMJ4o02X7x15Ksk5WUXQ1k__7UzvW3vqfkzfXgq93kZW5dknZ97sYh1R06flr0pxICq1QIpOu2JjK3XeXS2VhkPAAzKXdHcEIW_t2ssRnOZe_Cx5l9JrZS-KzvfB-ckEMCdS1YMldTey6GTmllJSYg1ZsgfVWTivAsJKe0OV-4Z40hIDJi2rp4SrfCafyrWS3p3zV4yFhdwpdigc-F0sRQ823cUqoyg54QEmmNQtD5QUPHrlnC3t449gfgVrNlAuw"
+//         },
+//         method: "POST",
+//         // body: JSON.stringify({"apikey":"S8C0EN8YHQ6KD00U","username":"anna.popovska.fireflyb36","userkey":"MMNF6OV4HH7K4YIS"}),
+//         body: '{"apikey":"S8C0EN8YHQ6KD00U","username":"anna.popovska.fireflyb36","userkey":"MMNF6OV4HH7K4YIS"}',
+//         mode: 'no-cors'
+//     })
+//         // .then( response => Promise.all([response, response.json()]));
+//         .then( response => Promise.all([response, console.log(response)]));
+// }
+
 function fetchPoster(input, init) {
     // console.log('fetchPoster');
     const URL = `http://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/v3/tv/${showId}?api_key=ab75dec43906f846e6200633b9ad43c7&&client_key=4c61b1676e8869c4553df95839f5a827`;
+    // const URL = `https://api.thetvdb.com/series/${showId}/images/query?keyType=poster`;              //tvdb
 
     return fetch(URL, {
         headers: {
-            "Content-Type": "application/json"
-        }
+            "Content-Type": "application/json",
+            // 'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTc5MDE4MDcsImlkIjoiZGF0YS1mZXRjaGluZy1hcHAiLCJvcmlnX2lhdCI6MTU1NzgxNTQwNywidXNlcmlkIjo1Mjc5NTIsInVzZXJuYW1lIjoiYW5uYS5wb3BvdnNrYS5maXJlZmx5YjM2In0.nBj-hDm7l4eLQHxCjhiNLc8UeZQZseiw5fKNpssGm1gF8twwGHsOjA7ra7qGZDMwKwo6sLw9egVw2jPUR4xV_WMJ4o02X7x15Ksk5WUXQ1k__7UzvW3vqfkzfXgq93kZW5dknZ97sYh1R06flr0pxICq1QIpOu2JjK3XeXS2VhkPAAzKXdHcEIW_t2ssRnOZe_Cx5l9JrZS-KzvfB-ckEMCdS1YMldTey6GTmllJSYg1ZsgfVWTivAsJKe0OV-4Z40hIDJi2rp4SrfCafyrWS3p3zV4yFhdwpdigc-F0sRQ823cUqoyg54QEmmNQtD5QUPHrlnC3t449gfgVrNlAuw'
+        },
+        // mode: 'no-cors'
     })
         .then( response => Promise.all([response, response.json()]));
-}
-
-function addItems(showId) {
-    return addItem(showId);
-
 }
 
 ///////////////////////// React component //////////////////////
 
 class App extends React.Component {
     componentDidMount(){
+        console.log(this.props);
         this.props.fetchShowsWithRedux()
-            .then(() => {
-                for(let i = 0; i < this.props.shows.length; i++){
-                    this.props.addItems(this.props.shows[i].show.ids.tvdb);
-                }
-            })
+            // .then(() => {
+            //     console.log(getToken());
+            // })
             .then(() => {
                     for(let i = 0; i < this.props.shows.length; i++){
-                        console.log(i);
+                        // console.log(i);
                         getId(this.props.shows[i].show.ids.tvdb);
                         this.props.fetchPosterWithRedux();
                     }
@@ -235,20 +196,22 @@ class App extends React.Component {
     }
 
     render(){
-
         let i = 0;
         return (
             <table>
                 <tbody>
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <TitleSearch />
+                    <td colSpan="3">
+                        <SortShows fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
                     </td>
-                    <td></td>
-                    <td></td>
+                    <td>
+                        <SearchByTitle fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                    </td>
+                    <td>Rank</td>
+                    <td>
+                        <SearchByYear fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                    </td>
+                    <td>No of Episodes</td>
                 </tr>
                 {(this.props.shows || []).map(show => {
                     ++i;
@@ -271,19 +234,12 @@ function mapStateToProps(state){
     return {
         posters: state.postersState.posters,
         shows: state.showsState.shows,
-        items: state.itemsState.items
+        queries: state.queryState.queries
     }
 }
 
-let Container = connect(mapStateToProps, {fetchPosterWithRedux, fetchShowsWithRedux, addItems})(App);
+let Container = connect(mapStateToProps, {fetchPosterWithRedux, fetchShowsWithRedux})(App);
 
-/////////////////////////////////// Redux store ////////////////////////////////
-const store = createStore(
-    rootReducer,
-    applyMiddleware(logger, ReduxThunk)
-);
-
-////////////////////////////// Rendering react elements ////////////////////////
 ReactDOM.render(
     <div>
         <Provider store={store}>
