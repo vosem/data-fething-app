@@ -1,6 +1,6 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import { generateYearQuery } from '../actions/actions';
+// import {connect} from 'react-redux';
+// import { generateYearQuery } from '../actions/actions';
 import './SearchByYear.css';
 
 class SearchByYear extends React.Component {
@@ -13,14 +13,13 @@ class SearchByYear extends React.Component {
                 className={'search-by-year'}
                 type="text"
                 placeholder="Year"
-                onKeyUp={event => {this.props.searchByYear(event); this.props.fetchShowsWithRedux()}}
+                onFocus={(e) => e.target.placeholder = ""}
+                onBlur={(e) => e.target.placeholder = "Year"}
+                onKeyUp={ async (event) => this.props.fetchShows(event.target.value) }
             />
         )
     }
 }
 
-function searchByYear(event) {
-    return generateYearQuery(event.target.value);
-}
-
-export default connect(null, { searchByYear })(SearchByYear);
+// export default connect(null, { searchByYear })(SearchByYear);
+export default SearchByYear;

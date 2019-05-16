@@ -55,5 +55,7 @@ function mapStateToProps(state){
         queries: state.queryState.queries
     }
 }
-
+// const mapDispatchToProps = (dispatch, ownProps) => {
+//     setPrevPage: () => dispatch(setPrevPage(event))
+// }
 export default connect(mapStateToProps, /*mapDispatchToProps,*/ { paginate, /*setPrevPage,*/ setNextPage })(Pagination);

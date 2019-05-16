@@ -13,6 +13,8 @@ class SearchByTitle extends React.Component {
                 className="search-by-title"
                 type="text"
                 placeholder="Title"
+                onFocus={(e) => e.target.placeholder = ""}
+                onBlur={(e) => e.target.placeholder = "Title"}
                 onKeyUp={event => {this.props.searchByTitle(event); this.props.fetchShowsWithRedux()}}
             />
         )
