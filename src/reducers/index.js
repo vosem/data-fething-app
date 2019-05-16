@@ -50,6 +50,27 @@ const queryReducer = (state = {}, action) => {
                     year: action.payload
                 }
             });
+        case "GENERATE_PAGE_QUERY":
+            return Object.assign({}, state, {
+                queries: {
+                    ...state.queries,
+                    page: action.payload
+                }
+            });
+        case "GENERATE_PREV_PAGE_QUERY":
+            return Object.assign({}, state, {
+                queries: {
+                    ...state.queries,
+                    page: action.payload
+                }
+            });
+        case "GENERATE_NEXT_PAGE_QUERY":
+            return Object.assign({}, state, {
+                queries: {
+                    ...state.queries,
+                    page: action.payload
+                }
+            });
         default:
             return state;
     }

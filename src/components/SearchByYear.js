@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import { generateYearQuery } from '../actions/actions';
+import './SearchByYear.css';
 
 class SearchByYear extends React.Component {
 
@@ -9,6 +10,7 @@ class SearchByYear extends React.Component {
     render() {
         return (
             <input
+                className={'search-by-year'}
                 type="text"
                 placeholder="Year"
                 onKeyUp={event => {this.props.searchByYear(event); this.props.fetchShowsWithRedux()}}
@@ -18,17 +20,7 @@ class SearchByYear extends React.Component {
 }
 
 function searchByYear(event) {
-    let searchParam = `&years=${event.target.value}`;
-    return generateYearQuery(searchParam);
+    return generateYearQuery(event.target.value);
 }
 
-
-function mapStateToProps(state){
-    return {
-        posters: state.postersState.posters,
-        shows: state.showsState.shows,
-        queries: state.queryState.queries
-    }
-}
-
-export default connect(mapStateToProps, /*mapDispatchToProps,*/ { searchByYear })(SearchByYear);
+export default connect(null, { searchByYear })(SearchByYear);

@@ -9,14 +9,12 @@ function fetchShowsError() {
         type: "FETCH_SHOWS_ERROR"
     }
 }
-
 function fetchPosterSuccess(payload) {
     return {
         type: "FETCH_POSTER_SUCCESS",
         payload
     }
 }
-
 function fetchPosterError() {
     return {
         type: "FETCH_POSTER_ERROR"
@@ -40,11 +38,32 @@ function generateSortingQuery(payload) {
         payload
     }
 }
+function generatePageQuery(payload) {
+    return {
+        type: "GENERATE_PAGE_QUERY",
+        payload
+    }
+}
+function generatePrevPageQuery(payload) {
+    return {
+        type: "GENERATE_PREV_PAGE_QUERY",
+        payload
+    }
+}
+function generateNextPageQuery(payload) {
+    return {
+        type: "GENERATE_NEXT_PAGE_QUERY",
+        payload
+    }
+}
 export {
     fetchShowsError,
     fetchPosterSuccess,
     fetchPosterError,
     generateTitleQuery,
     generateYearQuery,
-    generateSortingQuery
+    generateSortingQuery,
+    generatePageQuery,
+    generatePrevPageQuery,
+    generateNextPageQuery
 }

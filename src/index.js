@@ -7,6 +7,7 @@ import Show from './components/Show';
 import SearchByTitle from "./components/SearchByTitle";
 import SearchByYear from "./components/SearchByYear";
 import SortShows from "./components/SortShows";
+import Pagination from "./components/Pagination";
 import './index.css';
 
 /////////////////////////////// async shows requests ///////////////////////////
@@ -18,7 +19,6 @@ function fetchShowsWithRedux() {
         return fetchShows()
             .then((response) =>{
                 if(response !== 'undefined'){
-                    // console.log(response);
                     dispatch(fetchShowsSuccess(response))
                 }
                 else{
@@ -26,87 +26,31 @@ function fetchShowsWithRedux() {
                 }
                 return response;
             })
-            // .then((response) => {            // fetchPosterWithRedux() -> return does not work
-            //     console.log('!!!!', response);
-            //     console.log(store.getState().showsState.shows);
+            // .then(() => {            // fetchPosterWithRedux() -> return does not work
             //     for(let i = 0; i < store.getState().showsState.shows.length; i++){
-            //         console.log(i);
+            //         // console.log(i);
             //         getId(store.getState().showsState.shows[i].show.ids.tvdb);
+            //         console.log(store.getState().showsState.shows[i].show.ids.tvdb);
             //         fetchPosterWithRedux();
             //     }
             // });
     }
 }
 
-// function fetchShows(input, init) {
-//     return new Promise((resolve, reject) => {
-//         const URL = "https://api.trakt.tv/search/show?extended=full&limit=10&query=";
-//         const req = new XMLHttpRequest();
-//         req.open('GET', URL, true);
-//         const headers = {
-//             "Content-Type": "application/json",
-//             "trakt-api-version": "2",
-//             "trakt-api-key": "31f15cbdee3e55e2ceca6cd2e0e3ba9791b4f1feb1f7bab08c3d8ca6e018609a"
-//         };
-//         Object.keys(headers).forEach(key => req.setRequestHeader(key, headers[key]));
-//         req.onreadystatechange = () => {
-//             if (req.readyState != req.DONE) {
-//                 console.log(`readyState = ${req.readyState}`);
-//             } else if (req.status == 200) {
-//                 // try {
-//                 //     const res = JSON.parse(req.responseText);
-//                 //     console.log(res);
-//                 //     resolve(res);
-//                 // } catch (e) {
-//                 //     console.log(`Error: ${e}!!! ${req.responseText}`);
-//                 //     reject();
-//                 // }
-//                 resolve(req.responseText);
-//             } else {
-//                 console.log(`Error!!!`);
-//                 reject(req.status);
-//             }
-//         }
-//         req.send();
-//     }).then(res => {
-//         try {
-//             res = JSON.parse(res);
-//             console.log(res);
-//             return Promise.resolve(res);
-//         } catch (e) {
-//             console.log(`Error: ${e}!!! ${res}`);
-//             return Promise.reject(e);
-//         }
-//     });
-// }
-
 function generateShowsUrl (){
-    let URL, titleQuery, yearQuery, sortingQuery;
-
-    if(store.getState().queryState.queries) {
-        titleQuery = store.getState().queryState.queries.title;
-        yearQuery = store.getState().queryState.queries.year;
-        sortingQuery = store.getState().queryState.queries.sorting;
-    }
-
-    if(store.getState().queryState.queries && titleQuery === undefined) titleQuery = '';
-    if(store.getState().queryState.queries && yearQuery === undefined) yearQuery = '';
-
-    if (store.getState().queryState.queries) {
-        if(store.getState().queryState.queries.sorting === 'popular') {
-            URL = `https://api.trakt.tv/search/show?extended=full&limit=10&query=${titleQuery}${yearQuery}`
-        }
-        else URL = `https://api.trakt.tv/shows/${sortingQuery}?extended=full&limit=10&query=${titleQuery}${yearQuery}`;
-        console.log(URL);
-    }else {
-        URL = `https://api.trakt.tv/search/show?extended=full&limit=10&query=`;
-    }
+    const queries = store.getState().queryState.queries || {};
+    const { title, year, sorting, page, limit } = queries;
+    const P = sorting && sorting !== 'popular' ? [ 'shows', sorting ] : ['search', 'show' ];
+    const Q = { extended: 'full', query: title || '', fields: 'title', years: year, page: page || 0, limit: limit || 10 };
+    const QQ = Object.keys(Q).map(_ => [ _, Q[_] ]).filter(_ => _[1] || _[0]==='query');
+    const URL = `https://api.trakt.tv/${ P.join('/') }?${ QQ.map(_ => _.map(_ =>encodeURIComponent(_)).join('=') ).join('&') }`;
     return URL;
 }
 
- function fetchShows() {
+function fetchShows() {
 
     let URL = generateShowsUrl();
+    // console.log(URL);
 
     return fetch(URL, {
         headers: {
@@ -115,8 +59,11 @@ function generateShowsUrl (){
             "trakt-api-key": "31f15cbdee3e55e2ceca6cd2e0e3ba9791b4f1feb1f7bab08c3d8ca6e018609a"
         }
     })
-        // .then( response => Promise.all([response, response.json()]));
-        .then( response => response.json())
+        .then( response => {
+            console.log('x-pagination-page-count', response.headers.get('x-pagination-page-count'));
+            console.log('x-pagination-page', response.headers.get('x-pagination-page'));
+            return response.json()
+        })
 }
 
 /////////////////////// async poster requests ////////////////////
@@ -143,24 +90,24 @@ function getId(tvdbId) {
     return showId;
 }
 
-// function getToken() {
-//
-//     const URL = `https://api.thetvdb.com/login`;
-//
-//     return fetch(URL, {
-//         headers: {
-//             "Content-Type": "application/json",
-//             Accept: "application/json",
-//             // "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTc5MDE4MDcsImlkIjoiZGF0YS1mZXRjaGluZy1hcHAiLCJvcmlnX2lhdCI6MTU1NzgxNTQwNywidXNlcmlkIjo1Mjc5NTIsInVzZXJuYW1lIjoiYW5uYS5wb3BvdnNrYS5maXJlZmx5YjM2In0.nBj-hDm7l4eLQHxCjhiNLc8UeZQZseiw5fKNpssGm1gF8twwGHsOjA7ra7qGZDMwKwo6sLw9egVw2jPUR4xV_WMJ4o02X7x15Ksk5WUXQ1k__7UzvW3vqfkzfXgq93kZW5dknZ97sYh1R06flr0pxICq1QIpOu2JjK3XeXS2VhkPAAzKXdHcEIW_t2ssRnOZe_Cx5l9JrZS-KzvfB-ckEMCdS1YMldTey6GTmllJSYg1ZsgfVWTivAsJKe0OV-4Z40hIDJi2rp4SrfCafyrWS3p3zV4yFhdwpdigc-F0sRQ823cUqoyg54QEmmNQtD5QUPHrlnC3t449gfgVrNlAuw"
-//         },
-//         method: "POST",
-//         // body: JSON.stringify({"apikey":"S8C0EN8YHQ6KD00U","username":"anna.popovska.fireflyb36","userkey":"MMNF6OV4HH7K4YIS"}),
-//         body: '{"apikey":"S8C0EN8YHQ6KD00U","username":"anna.popovska.fireflyb36","userkey":"MMNF6OV4HH7K4YIS"}',
-//         mode: 'no-cors'
-//     })
-//         // .then( response => Promise.all([response, response.json()]));
-//         .then( response => Promise.all([response, console.log(response)]));
-// }
+function getToken() {
+    const body = {
+        apikey: 'Q13BY1KX85AT1XY1',
+        username: 'anna.popovska.fireflyb36',
+        userkey: 'MMNF6OV4HH7K4YIS'
+    };
+    return fetch(`https://api.thetvdb.com/login`, {
+        headers: {
+            'Content-Type': "application/json",
+            Accept: "application/json",
+            // "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTc5MDE4MDcsImlkIjoiZGF0YS1mZXRjaGluZy1hcHAiLCJvcmlnX2lhdCI6MTU1NzgxNTQwNywidXNlcmlkIjo1Mjc5NTIsInVzZXJuYW1lIjoiYW5uYS5wb3BvdnNrYS5maXJlZmx5YjM2In0.nBj-hDm7l4eLQHxCjhiNLc8UeZQZseiw5fKNpssGm1gF8twwGHsOjA7ra7qGZDMwKwo6sLw9egVw2jPUR4xV_WMJ4o02X7x15Ksk5WUXQ1k__7UzvW3vqfkzfXgq93kZW5dknZ97sYh1R06flr0pxICq1QIpOu2JjK3XeXS2VhkPAAzKXdHcEIW_t2ssRnOZe_Cx5l9JrZS-KzvfB-ckEMCdS1YMldTey6GTmllJSYg1ZsgfVWTivAsJKe0OV-4Z40hIDJi2rp4SrfCafyrWS3p3zV4yFhdwpdigc-F0sRQ823cUqoyg54QEmmNQtD5QUPHrlnC3t449gfgVrNlAuw"
+        },
+        method: 'POST',
+        body: JSON.stringify(body),
+        mode: 'no-cors',
+    })
+    .then(_ => console.log(_));
+}
 
 function fetchPoster(input, init) {
     // console.log('fetchPoster');
@@ -181,54 +128,54 @@ function fetchPoster(input, init) {
 
 class App extends React.Component {
     componentDidMount(){
-        console.log(this.props);
         this.props.fetchShowsWithRedux()
-            // .then(() => {
-            //     console.log(getToken());
-            // })
+            // .then(() => getToken())
             .then(() => {
-                    for(let i = 0; i < this.props.shows.length; i++){
-                        // console.log(i);
-                        getId(this.props.shows[i].show.ids.tvdb);
-                        this.props.fetchPosterWithRedux();
-                    }
+                for(let i = 0; i < this.props.shows.length; i++){
+                    // console.log(this.props.shows[i].show);
+                    // console.log(store.getState().showsState.shows[i].show);
+                    getId(this.props.shows[i].show.ids.tvdb);
+                    this.props.fetchPosterWithRedux();
+                }
             })
     }
 
     render(){
         let i = 0;
         return (
-            <table>
-                <tbody>
-                <tr>
-                    <td colSpan="3">
-                        <SortShows fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
-                    </td>
-                    <td>
-                        <SearchByTitle fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
-                    </td>
-                    <td>Rank</td>
-                    <td>
-                        <SearchByYear fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
-                    </td>
-                    <td>No of Episodes</td>
-                </tr>
-                {(this.props.shows || []).map(show => {
-                    ++i;
-                       return <Show
-                            key={i}
-                            showNumber={i}
-                            showId={show.show.ids.tvdb}
-                            show={show.show}
-                        />
-                    }
-                )}
-                </tbody>
-            </table>
+            <div>
+                <Pagination fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                <table>
+                    <tbody>
+                    <tr>
+                        <td colSpan="3">
+                            <SortShows fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                        </td>
+                        <td>
+                            <SearchByTitle fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                        </td>
+                        <td>Rank</td>
+                        <td>
+                            <SearchByYear fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                        </td>
+                        <td>No of<br/>Episodes</td>
+                    </tr>
+                    {(this.props.shows || []).map(show => {
+                        ++i;
+                           return <Show
+                                key={i}
+                                showNumber={i}
+                                showId={show.show.ids.tvdb}
+                                show={show.show}
+                            />
+                        }
+                    )}
+                    </tbody>
+                </table>
+            </div>
         )
     }
 }
-
 
 function mapStateToProps(state){
     return {

@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {generateSortingQuery} from '../actions/actions';
+import './SortShows.css';
 
 class SortShows extends React.Component {
 
@@ -9,6 +10,7 @@ class SortShows extends React.Component {
     render() {
         return (
             <select
+                className="sort-shows"
                 name = "sortShows"
                 defaultValue={"popular"}
                 onChange={event => {this.props.sortShows(event); this.props.fetchShowsWithRedux()}}
@@ -25,8 +27,7 @@ class SortShows extends React.Component {
 }
 
 function sortShows(event) {
-    let searchParam = event.target.value;
-    return generateSortingQuery(searchParam);
+    return generateSortingQuery(event.target.value);
 }
 
 export default connect(null, /*mapDispatchToProps,*/ { sortShows })(SortShows);

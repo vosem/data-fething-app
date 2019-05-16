@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import { generateTitleQuery } from '../actions/actions';
+import './SearchByTitle.css';
 
 class SearchByTitle extends React.Component {
 
@@ -9,6 +10,7 @@ class SearchByTitle extends React.Component {
     render() {
         return (
             <input
+                className="search-by-title"
                 type="text"
                 placeholder="Title"
                 onKeyUp={event => {this.props.searchByTitle(event); this.props.fetchShowsWithRedux()}}
@@ -18,10 +20,7 @@ class SearchByTitle extends React.Component {
 }
 
 function searchByTitle(event) {
-
-    let searchParam = `${event.target.value}&fields=title`;
-    return generateTitleQuery(searchParam);
-
+    return generateTitleQuery(event.target.value);
 }
 
 export default connect(null, /*mapDispatchToProps,*/ { searchByTitle })(SearchByTitle);
