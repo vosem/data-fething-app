@@ -1,11 +1,7 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import {generateSortingQuery} from '../actions/actions';
 import './SortShows.css';
 
 class SortShows extends React.Component {
-
-    componentDidMount(){}
 
     render() {
         return (
@@ -13,7 +9,7 @@ class SortShows extends React.Component {
                 className="sort-shows"
                 name = "sortShows"
                 defaultValue={"popular"}
-                onChange={event => {this.props.sortShows(event); this.props.fetchShowsWithRedux()}}
+                onChange={event => this.props.fetchShowsBySorting(event.target.value) }
                 style={{width: 100 + '%'}}
             >
                 <option value={"popular"}>popular</option>
@@ -26,8 +22,4 @@ class SortShows extends React.Component {
     }
 }
 
-function sortShows(event) {
-    return generateSortingQuery(event.target.value);
-}
-
-export default connect(null, /*mapDispatchToProps,*/ { sortShows })(SortShows);
+export default SortShows;

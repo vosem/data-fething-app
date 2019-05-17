@@ -20,6 +20,18 @@ function fetchPosterError() {
         type: "FETCH_POSTER_ERROR"
     }
 }
+function fetchCurrentPage(payload) {
+    return {
+        type: "FETCH_CURRENT_PAGE",
+        payload
+    }
+}
+function fetchPagesTotal(payload) {
+    return {
+        type: "FETCH_PAGES_QUANTITY",
+        payload
+    }
+}
 function generateTitleQuery(payload) {
     return {
         type: "GENERATE_TITLE_QUERY",
@@ -65,5 +77,7 @@ export {
     generateSortingQuery,
     generatePageQuery,
     generatePrevPageQuery,
-    generateNextPageQuery
+    generateNextPageQuery,
+    fetchCurrentPage,
+    fetchPagesTotal
 }

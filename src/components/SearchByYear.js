@@ -1,25 +1,20 @@
 import React from 'react';
-// import {connect} from 'react-redux';
-// import { generateYearQuery } from '../actions/actions';
 import './SearchByYear.css';
 
 class SearchByYear extends React.Component {
-
-    componentDidMount(){}
-
     render() {
+        console.log('SearchByYearComponent ', this.props);
         return (
             <input
-                className={'search-by-year'}
-                type="text"
-                placeholder="Year"
-                onFocus={(e) => e.target.placeholder = ""}
-                onBlur={(e) => e.target.placeholder = "Year"}
-                onKeyUp={ async (event) => this.props.fetchShows(event.target.value) }
+                className={ 'search-by-year' }
+                type={ 'text' }
+                placeholder={ 'Year' }
+                onFocus={ event => event.target.placeholder = "" }
+                onBlur={ event => event.target.placeholder = "Year" }
+                onKeyUp={ event => this.props.fetchShowsByYear(event.target.value) }
             />
         )
     }
 }
 
-// export default connect(null, { searchByYear })(SearchByYear);
 export default SearchByYear;

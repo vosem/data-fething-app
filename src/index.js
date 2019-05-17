@@ -7,7 +7,12 @@ import {
     fetchShowsError,
     fetchPosterSuccess,
     fetchPosterError,
-    generateYearQuery
+    generateYearQuery,
+    generateTitleQuery,
+    fetchCurrentPage,
+    fetchPagesTotal,
+    generateSortingQuery,
+    generatePageQuery
 } from './actions/actions';
 import Show from './components/Show';
 import SearchByTitle from "./components/SearchByTitle";
@@ -41,16 +46,14 @@ async function fetchShows(options) {
     };
     const response = await fetch(url, { headers });
     let json = await response.json();
-    // !!! nice
     json = json.map(_ => {
         const { score, show, type } = _ || {};
         return { score, type, ...show };
     });
-    // !!! nice
-    console.log('x-pagination-page-count', response.headers.get('x-pagination-page-count'));
-    console.log('x-pagination-page', response.headers.get('x-pagination-page'));
+    const currentPage = response.headers.get('x-pagination-page');
+    const pagesTotal = response.headers.get('x-pagination-page-count');
     console.log('return fetchShows', json);
-    return json;
+    return { json, currentPage, pagesTotal };
 }
 
 async function fetchPoster(showId) {
@@ -74,6 +77,7 @@ async function fetchPoster(showId) {
         headers,
         // mode: 'no-cors'
     });
+
     const json = await response.json();
     console.log('fetchSreturn fetchPoster', json);
     return json;
@@ -84,31 +88,14 @@ function fetchShowsWithRedux(options) {
     return async (dispatch) => {
         console.log('dispatch fetchShowsWithRedux');
         try {
-            const json = await fetchShows(options);
+            const { json, currentPage, pagesTotal } = await fetchShows(options);
             dispatch(fetchShowsSuccess(json));
+            dispatch(fetchCurrentPage(currentPage));
+            dispatch(fetchPagesTotal(pagesTotal));
+            console.log(currentPage, pagesTotal);
         } catch (e) {
-            dispatch(fetchShowsError())
+            dispatch(fetchShowsError());
         }
-        // return fetchShows()
-        //     .then((response) =>{
-        //         if(response !== 'undefined'){
-        //             dispatch(fetchShowsSuccess(response))
-        //         }
-        //         else{
-        //             dispatch(fetchShowsError())
-        //         }
-        //         return response;
-        //     })
-        // .then((shows) => {            // fetchPosterWithRedux() -> return does not work
-        //     for(let i = 0; i < shows.length; i++){
-        //         const show = shows[i];
-        //         // console.log('!!!', show);
-        //         // console.log(i);
-        //         getId(show.show.ids.tvdb);
-        //         // console.log(show.show.ids.tvdb);
-        //         fetchPosterWithRedux();
-        //     }
-        // });
     }
 }
 
@@ -123,12 +110,6 @@ function fetchPosterWithRedux(showId) {
             dispatch(fetchPosterError());
         }
     }
-}
-
-let showId = 0;
-function getId(tvdbId) {
-    showId = tvdbId;
-    return showId;
 }
 
 async function getToken() {
@@ -146,13 +127,34 @@ async function getToken() {
         "Host": "api.thetvdb.com",
         "content-length": body.length
     });
-    const response = await fetch(new Request(url, {
-        method: 'POST',
-        headers,
-        // mode: "no-cors",
-        body,
-        cache: "reload",
-    }));
+    // const response = await fetch(new Request(url, {
+    //     method: 'POST',
+    //     headers,
+    //     // mode: "no-cors",
+    //     body,
+    //     cache: "reload",
+    // }));
+
+    const response = await function (){
+        const xhr = new XMLHttpRequest();
+        console.log(xhr);
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.send(body);
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState != xhr.DONE) {
+                console.log(`readyState = ${xhr.readyState}`);
+            } else if (xhr.status == 200) {
+                console.log('xhr.responseText', xhr.responseText);
+                return (xhr.responseText);
+            } else {
+                console.log(`Error!!!`);
+                return(xhr.status);
+            }
+        }
+    }
+    response();
     console.log(url);
     console.log(headers);
     console.log(body);
@@ -165,53 +167,80 @@ async function getToken() {
 class App extends React.Component {
 
     async componentDidMount() {
-        this.props.fetchShowsWithRedux();
-            // // .then(() => getToken())
-            // .then(() => {
-            //     for(let i = 0; i < this.props.shows.length; i++){
-            //         // console.log(this.props.shows[i].show);
-            //         // console.log(store.getState().showsState.shows[i].show);
-            //         getId(this.props.shows[i].show.ids.tvdb);
-            //         this.props.fetchPosterWithRedux();
-            //     }
-            // })
+        await this.props.fetchShowsWithRedux();
+        this.fetchPosters();
+        // getToken();
+        // .then(() => {
+        //     for(let i = 0; i < this.props.shows.length; i++){
+        //         // console.log(this.props.shows[i].show);
+        //         // console.log(store.getState().showsState.shows[i].show);
+        //         getId(this.props.shows[i].show.ids.tvdb);
+        //         this.props.fetchPosterWithRedux();
+        //     }
+        // })
     }
 
-    async fetchShows() {
-        return (year) => {
-            generateYearQuery(year);
-            const options = store.getState().queryState.queries;
-            console.log(options);
-            fetchShowsWithRedux(options);
-        }
+    fetchPosters = () => {
+        const shows = store.getState().showsState.shows || [];
+        shows.forEach((show) => this.props.fetchPosterWithRedux(show.ids.tvdb));
+    }
 
+    fetchShowsByTitle = async (title) => {
+        this.props.generateTitleQuery(title);
+        const options = store.getState().queryState.queries;
+        await this.props.fetchShowsWithRedux(options);
+        this.fetchPosters();
+    }
+
+    fetchShowsByYear = async (year) => {
+        this.props.generateYearQuery(year);
+        const options = store.getState().queryState.queries;
+        await this.props.fetchShowsWithRedux(options);
+        this.fetchPosters();
+    }
+
+    fetchShowsBySorting = async (sorting) => {
+        this.props.generateSortingQuery(sorting);
+        const options = store.getState().queryState.queries;
+        await this.props.fetchShowsWithRedux(options);
+        this.fetchPosters();
+    }
+
+    fetchShowsByPage = async (page) => {
+        this.props.generatePageQuery(page);
+        const options = store.getState().queryState.queries;
+        await this.props.fetchShowsWithRedux(options);
+        this.fetchPosters();
     }
 
     render(){
         let shows = this.props.shows || [];
         shows = shows.map((show, i) => (<Show
-                key={i}
-                showNumber={i}
+                key={i+1}
+                showNumber={i+1}
                 showId={show.ids.tvdb}
                 show={show}
             />)
         );
 
         return (
+
             <div>
-                <Pagination fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                <Pagination
+                    fetchShowsByPage={this.fetchShowsByPage}
+                />
                 <table>
                     <tbody>
                     <tr>
                         <td colSpan="3">
-                            <SortShows fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                            <SortShows fetchShowsBySorting={this.fetchShowsBySorting} />
                         </td>
                         <td>
-                            <SearchByTitle fetchShowsWithRedux={this.props.fetchShowsWithRedux} />
+                            <SearchByTitle fetchShowsByTitle={this.fetchShowsByTitle} />
                         </td>
                         <td>Rank</td>
                         <td>
-                            <SearchByYear fetchShowsWithRedux={this.fetchShows()} />
+                            <SearchByYear fetchShowsByYear={this.fetchShowsByYear} />
                         </td>
                         <td>No of<br/>Episodes</td>
                     </tr>
@@ -231,12 +260,19 @@ function mapStateToProps(state){
     }
 }
 
-let Container = connect(mapStateToProps, {fetchPosterWithRedux, fetchShowsWithRedux})(App);
+let Container = connect(mapStateToProps, {
+    fetchPosterWithRedux,
+    fetchShowsWithRedux,
+    generateTitleQuery,
+    generateYearQuery,
+    generateSortingQuery,
+    generatePageQuery
+})(App);
 
 ReactDOM.render(
     <div>
         <Provider store={store}>
-            <Container/>
+            <Container />
         </Provider>
     </div>,
     document.getElementById('root')

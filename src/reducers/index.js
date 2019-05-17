@@ -5,7 +5,7 @@ const posterReducer = (state = {}, action) => {
         case "FETCH_POSTER_SUCCESS":
             return Object.assign({}, state, {
                 posters: [
-                    ...state.posters || [],
+                    ...state.posters/*.filter(poster => search not in store )*/ || [],
                     {
                         poster: action.payload
                     }
@@ -69,6 +69,20 @@ const queryReducer = (state = {}, action) => {
                 queries: {
                     ...state.queries,
                     page: action.payload
+                }
+            });
+        case "FETCH_CURRENT_PAGE":
+            return Object.assign({}, state, {
+                queries: {
+                    ...state.queries,
+                    page: action.payload
+                }
+            });
+        case "FETCH_PAGES_QUANTITY":
+            return Object.assign({}, state, {
+                queries: {
+                    ...state.queries,
+                    pagesTotal: action.payload
                 }
             });
         default:
