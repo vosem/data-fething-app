@@ -3,7 +3,6 @@ import './SearchByYear.css';
 
 class SearchByYear extends React.Component {
     render() {
-        console.log('SearchByYearComponent ', this.props);
         return (
             <input
                 className={ 'search-by-year' }

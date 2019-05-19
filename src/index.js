@@ -92,7 +92,6 @@ function fetchShowsWithRedux(options) {
             dispatch(fetchShowsSuccess(json));
             dispatch(fetchCurrentPage(currentPage));
             dispatch(fetchPagesTotal(pagesTotal));
-            console.log(currentPage, pagesTotal);
         } catch (e) {
             dispatch(fetchShowsError());
         }
@@ -182,11 +181,21 @@ class App extends React.Component {
 
     fetchPosters = () => {
         const shows = store.getState().showsState.shows || [];
-        shows.forEach((show) => this.props.fetchPosterWithRedux(show.ids.tvdb));
+        const posters = store.getState().postersState.posters;
+        shows.forEach((show) => {
+            if (posters)
+            {
+                if (posters.filter((item) => +item.poster.thetvdb_id === show.ids.tvdb).length !== 0){
+                    return;
+                } else this.props.fetchPosterWithRedux(show.ids.tvdb);
+            } else this.props.fetchPosterWithRedux(show.ids.tvdb);
+        })
+
     }
 
     fetchShowsByTitle = async (title) => {
         this.props.generateTitleQuery(title);
+        this.props.generatePageQuery(1);
         const options = store.getState().queryState.queries;
         await this.props.fetchShowsWithRedux(options);
         this.fetchPosters();
@@ -194,6 +203,7 @@ class App extends React.Component {
 
     fetchShowsByYear = async (year) => {
         this.props.generateYearQuery(year);
+        this.props.generatePageQuery(1);
         const options = store.getState().queryState.queries;
         await this.props.fetchShowsWithRedux(options);
         this.fetchPosters();
@@ -201,6 +211,7 @@ class App extends React.Component {
 
     fetchShowsBySorting = async (sorting) => {
         this.props.generateSortingQuery(sorting);
+        this.props.generatePageQuery(1);
         const options = store.getState().queryState.queries;
         await this.props.fetchShowsWithRedux(options);
         this.fetchPosters();

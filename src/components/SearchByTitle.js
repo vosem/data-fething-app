@@ -1,9 +1,11 @@
 import React from 'react';
+import ReactDOM from "react-dom";
 import './SearchByTitle.css';
+// import Pagination from "./Pagination";
 
 class SearchByTitle extends React.Component {
 
-    componentDidMount(){}
+     // clearInput() {ReactDOM.findDOMNode(this.refs.currentPageInput).value=""};
 
     render() {
         return (
@@ -13,7 +15,7 @@ class SearchByTitle extends React.Component {
                 placeholder="Title"
                 onFocus={event => event.target.placeholder = ""}
                 onBlur={event => event.target.placeholder = "Title"}
-                onKeyUp={event => this.props.fetchShowsByTitle(event.target.value)}
+                onKeyUp={event => {this.props.fetchShowsByTitle(event.target.value); console.log('fffffff', ReactDOM.findDOMNode(this.refs.currentPageInput))}}
             />
         )
     }
