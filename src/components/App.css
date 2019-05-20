@@ -1,0 +1,10 @@
+table {
+  margin: auto;
+  text-align: center;
+  border-collapse: collapse;
+}
+input:hover,
+button:enabled:hover,
+select:hover {
+  background-color: #fff;
+}
