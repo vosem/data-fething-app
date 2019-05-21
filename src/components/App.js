@@ -13,11 +13,11 @@ import {
     generateSortingQuery,
     generatePageQuery
 } from '../actions/actions';
-import Show from './Show';
 import SearchByTitle from "./SearchByTitle";
 import SearchByYear from "./SearchByYear";
 import SortShows from "./SortShows";
 import Pagination from "./Pagination";
+import Shows from "./Shows";
 import './App.css';
 
 async function fetchShows(options) {
@@ -102,94 +102,71 @@ function fetchPosterWithRedux(showId) {
     }
 }
 
-async function getToken() {
-    const url = "https://api.thetvdb.com/login";
-    const body = JSON.stringify({
-        "apikey": "I9BNICRZC43FVWDE",
-        "userkey": "MMNF6OV4HH7K4YIS",
-        "username": "anna.popovska.fireflyb36"
-    });
-    const headers = new Headers({
-        "Accept": "application/json",
-        "Content-Type": "application/json; charset=utf-8",
-        "User-Agent": "PostmanRuntime/7.13.0",
-        "Cache-Control": "no-cache",
-        "Host": "api.thetvdb.com",
-        "content-length": body.length
-    });
-    // const response = await fetch(new Request(url, {
-    //     method: 'POST',
-    //     headers,
-    //     // mode: "no-cors",
-    //     body,
-    //     cache: "reload",
-    // }));
-
-    const response = await function (){
-        const xhr = new XMLHttpRequest();
-        console.log(xhr);
-        xhr.open('POST', url, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.setRequestHeader('Accept', 'application/json');
-        xhr.send(body);
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState != xhr.DONE) {
-                console.log(`readyState = ${xhr.readyState}`);
-            } else if (xhr.status == 200) {
-                console.log('xhr.responseText', xhr.responseText);
-                return (xhr.responseText);
-            } else {
-                console.log(`Error!!!`);
-                return(xhr.status);
-            }
-        }
-    }
-    response();
-    console.log(url);
-    console.log(headers);
-    console.log(body);
-    console.log(response);
-    return response;
-}
-
 ///////////////////////// React component //////////////////////
 
 class App extends React.Component {
 
+    constructor(props) {
+        super(props);
+        this.generateTitleQuery = this.props.generateTitleQuery.bind(this);
+        this.generateYearQuery = this.props.generateYearQuery.bind(this);
+        this.generatePageQuery = this.props.generatePageQuery.bind(this);
+        this.typingTimer = 0;
+        this.state = {
+            contentReady: false
+        }
+    }
+
     async componentDidMount() {
         await this.props.fetchShowsWithRedux();
-        this.fetchPosters();
-        // getToken();
+        await this.fetchPosters();
+        this.setState(() => ({ // does not wait fetching all posters
+            contentReady: true
+        }));
+        console.log(this.state.contentReady);
     }
 
     fetchPosters = () => {
         const shows = store.getState().showsState.shows || [];
         const posters = store.getState().postersState.posters;
-        shows.forEach((show) => {
+        shows.forEach( (show) => {
             if (posters)
             {
                 if (posters.filter((item) => +item.poster.thetvdb_id === show.ids.tvdb).length !== 0){
                     return;
-                } else this.props.fetchPosterWithRedux(show.ids.tvdb);
-            } else this.props.fetchPosterWithRedux(show.ids.tvdb);
+                } else return this.props.fetchPosterWithRedux(show.ids.tvdb);
+            } else return this.props.fetchPosterWithRedux(show.ids.tvdb);
         })
-
     }
 
-    fetchShowsByTitle = async (title) => {
-        this.props.generateTitleQuery(title);
-        this.props.generatePageQuery(1);
-        const options = store.getState().queryState.queries;
-        await this.props.fetchShowsWithRedux(options);
-        this.fetchPosters();
+    fetchShowsByTitle = (title) => {
+        clearTimeout(this.typingTimer);
+        if (title) {
+            this.typingTimer = setTimeout(
+                async () => {
+                    this.generateTitleQuery(title);
+                    this.generatePageQuery(1);
+                    const options = store.getState().queryState.queries;
+                    console.log(options);
+                    await this.props.fetchShowsWithRedux(options);
+                    this.fetchPosters();
+                }, 1000);
+        }
     }
 
-    fetchShowsByYear = async (year) => {
-        this.props.generateYearQuery(year);
-        this.props.generatePageQuery(1);
-        const options = store.getState().queryState.queries;
-        await this.props.fetchShowsWithRedux(options);
-        this.fetchPosters();
+    fetchShowsByYear = (year) => {
+        clearTimeout(this.typingTimer);
+        if (year) {
+            this.typingTimer = setTimeout(
+                async () => {
+                    this.generateYearQuery(year);
+                    this.generatePageQuery(1);
+                    const options = store.getState().queryState.queries;
+                    console.log(options);
+                    await this.props.fetchShowsWithRedux(options);
+                    this.fetchPosters();
+                }, 1000);
+        }
     }
 
     fetchShowsBySorting = async (sorting) => {
@@ -207,41 +184,55 @@ class App extends React.Component {
         this.fetchPosters();
     }
 
+    fetchShowsByEnteredPage = (page) => {
+        clearTimeout(this.typingTimer);
+        if (page) {
+            this.typingTimer = setTimeout(
+                async () => {
+                    const lastPage = +store.getState().queryState.queries.pagesTotal;
+                    page = +page > lastPage ? lastPage : page;
+                    page = +page < 1 ? 1 : page;
+                    this.generatePageQuery(page);
+                    let options = store.getState().queryState.queries;
+                    await this.props.fetchShowsWithRedux(options);
+                    this.fetchPosters();
+                }, 1000);
+        }
+    }
+
     render(){
-        let shows = this.props.shows || [];
-        shows = shows.map((show, i) => (<Show
-                posters = {this.props.posters}
-                key={i+1}
-                showNumber={i+1}
-                showId={show.ids.tvdb}
-                show={show}
-            />)
-        );
-
         return (
-
             <div>
                 <Pagination
                     fetchShowsByPage={this.fetchShowsByPage}
+                    fetchShowsByEnteredPage={this.fetchShowsByEnteredPage}
                 />
                 <table>
-                    <tbody>
-                    <tr>
-                        <td colSpan="3">
-                            <SortShows fetchShowsBySorting={this.fetchShowsBySorting} />
-                        </td>
-                        <td>
-                            <SearchByTitle fetchShowsByTitle={this.fetchShowsByTitle} />
-                        </td>
-                        <td>Rank</td>
-                        <td>
-                            <SearchByYear fetchShowsByYear={this.fetchShowsByYear} />
-                        </td>
-                        <td>No of<br/>Episodes</td>
-                    </tr>
-                    {shows}
-                    </tbody>
+                    <thead>
+                        <tr>
+                            <td colSpan="2">
+                                <SortShows fetchShowsBySorting={this.fetchShowsBySorting} />
+                            </td>
+                            <td>
+                                <SearchByTitle fetchShowsByTitle={this.fetchShowsByTitle} />
+                            </td>
+                            <td>Rank</td>
+                            <td>
+                                <SearchByYear fetchShowsByYear={this.fetchShowsByYear} />
+                            </td>
+                            <td>TVDB Id</td>
+                            <td>No of<br/>Episodes</td>
+                        </tr>
+                    </thead>
+                    <Shows
+                        posters={this.props.posters}
+                        shows={this.props.shows}
+                    />
                 </table>
+                <Pagination
+                    fetchShowsByPage={this.fetchShowsByPage}
+                    fetchShowsByPageDelayed={this.fetchShowsByPageDelayed}
+                />
             </div>
         )
     }

@@ -31,7 +31,7 @@ class Pagination extends React.Component {
                     onFocus={(e) => e.target.placeholder = ""}
                     onBlur={(e) => e.target.placeholder = placeholder}
                     onKeyUp={event => {
-                        this.props.fetchShowsByPage(event.target.value);
+                        this.props.fetchShowsByEnteredPage(event.target.value);
                         setTimeout(()=>{
                             this.clearInput();
                             }, 5000)

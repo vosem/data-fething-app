@@ -13,7 +13,7 @@ function SearchByTitle (props) {
             placeholder="Title"
             onFocus={event => event.target.placeholder = ""}
             onBlur={event => event.target.placeholder = "Title"}
-            onKeyUp={event => {props.fetchShowsByTitle(event.target.value); console.log('input ref: ', ReactDOM.findDOMNode(this.refs.currentPageInput))}}
+            onKeyUp={event => {props.fetchShowsByTitle(event.target.value)/*; console.log('input ref: ', ReactDOM.findDOMNode(this.refs.currentPageInput))*/}}
         />
     )
 }
