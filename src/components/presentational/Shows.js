@@ -3,21 +3,17 @@ import Show from "./Show";
 import no_poster from "../../assets/no_poster.jpg";
 
 class Shows extends React.Component {
-    constructor(props){
-        super(props);
-    }
 
     render(){
         let shows = this.props.shows,
             posterUrl,
             poster,
             posterAlt,
-            // postersFetchingQuantity = "store max count of (un)fetched posters",
             showIndex = this.props.queries ? 10 * (this.props.queries.page - 1) : 1;
 
         shows = shows && shows.map((show, i) => {
             showIndex++;
-            if (this.props.posters) { // TODO: optionally - check store count of posters === 0
+            if (this.props.posters) {
                 poster = this.props.posters.filter(poster => {
                     return poster.poster.thetvdb_id === show.ids.tvdb.toString();
                 });
@@ -32,12 +28,6 @@ class Shows extends React.Component {
                     posterAlt = 'no poster'
                 }
             }
-            // const posterLoad = () => {
-            //     postersFetchingQuantity--;
-            //     if (!postersFetchingQuantity) {
-            //         // console.log('loaded');
-            //     }
-            // };
             return (<Show
                 posters = {this.props.posters}
                 posterUrl = {posterUrl}
@@ -45,8 +35,6 @@ class Shows extends React.Component {
                 key={i+1}
                 showNumber={showIndex}
                 show={show}
-                // load={posterLoad}
-                // error={posterLoad}
             />)}
 
         );

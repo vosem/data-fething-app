@@ -5,7 +5,7 @@ const posterReducer = (state = {}, action) => {
         case "FETCH_POSTER_SUCCESS":
             return Object.assign({}, state, {
                 posters: [
-                    ...state.posters/*.filter(poster => poster !== action.payload )*/ || [],
+                    ...state.posters || [],
                     {
                         poster: action.payload
                     }

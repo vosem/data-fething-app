@@ -60,10 +60,8 @@ async function fetchPoster(showId) {
         .map(_ => [ _, query[_] ].map(_ => encodeURIComponent(_)).join('=') )
         .join('&');
     const url = `https://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/${ path }?${ q }`;
-    // const url = `https://api.thetvdb.com/series/${showId}/images/query?keyType=poster`;              //tvdb
     const headers = {
-        "Content-Type": "application/json",
-        // 'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTc5MDE4MDcsImlkIjoiZGF0YS1mZXRjaGluZy1hcHAiLCJvcmlnX2lhdCI6MTU1NzgxNTQwNywidXNlcmlkIjo1Mjc5NTIsInVzZXJuYW1lIjoiYW5uYS5wb3BvdnNrYS5maXJlZmx5YjM2In0.nBj-hDm7l4eLQHxCjhiNLc8UeZQZseiw5fKNpssGm1gF8twwGHsOjA7ra7qGZDMwKwo6sLw9egVw2jPUR4xV_WMJ4o02X7x15Ksk5WUXQ1k__7UzvW3vqfkzfXgq93kZW5dknZ97sYh1R06flr0pxICq1QIpOu2JjK3XeXS2VhkPAAzKXdHcEIW_t2ssRnOZe_Cx5l9JrZS-KzvfB-ckEMCdS1YMldTey6GTmllJSYg1ZsgfVWTivAsJKe0OV-4Z40hIDJi2rp4SrfCafyrWS3p3zV4yFhdwpdigc-F0sRQ823cUqoyg54QEmmNQtD5QUPHrlnC3t449gfgVrNlAuw'
+        "Content-Type": "application/json"
     };
     const response = await fetch(url, {
         headers,
@@ -95,11 +93,8 @@ function fetchPosterWithRedux(showId) {
         } catch (e) {
             dispatch(fetchPosterError());
         }
-        // TODO: optionally - decrement store count of posters async load calls
     }
 }
-
-///////////////////////// React component //////////////////////
 
 class App extends React.Component {
 
@@ -115,14 +110,11 @@ class App extends React.Component {
     async componentDidMount() {
         await this.props.fetchShowsWithRedux();
         await this.fetchPosters();
-        this.setState({ contentReady: true });
-        // console.log(this.state.contentReady);
     }
 
     fetchPosters = async () => {
         const shows = store.getState().showsState.shows || [];
         const posters = store.getState().postersState.posters;
-        // TODO: optionally - store max count of posters async load calls
         await shows.forEach( (show) => {
             if (posters)
             {
