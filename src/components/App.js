@@ -12,7 +12,7 @@ import {
     fetchPagesTotal,
     generateSortingQuery,
     generatePageQuery
-} from '../actions/actions';
+} from '../actions';
 import SearchByTitle from "./SearchByTitle";
 import SearchByYear from "./SearchByYear";
 import SortShows from "./SortShows";
@@ -63,7 +63,7 @@ async function fetchPoster(showId) {
         .filter(_ => query[_] )
         .map(_ => [ _, query[_] ].map(_ => encodeURIComponent(_)).join('=') )
         .join('&');
-    const url = `http://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/${ path }?${ q }`;
+    const url = `https://private-anon-d2c67a30e4-fanarttv.apiary-proxy.com/${ path }?${ q }`;
     // const url = `https://api.thetvdb.com/series/${showId}/images/query?keyType=poster`;              //tvdb
     const headers = {
         "Content-Type": "application/json",
@@ -99,6 +99,7 @@ function fetchPosterWithRedux(showId) {
         } catch (e) {
             dispatch(fetchPosterError());
         }
+        // TODO: decrement store count of posters async load calls
     }
 }
 
@@ -112,24 +113,21 @@ class App extends React.Component {
         this.generateYearQuery = this.props.generateYearQuery.bind(this);
         this.generatePageQuery = this.props.generatePageQuery.bind(this);
         this.typingTimer = 0;
-        this.state = {
-            contentReady: false
-        }
+        this.state = { contentReady: false }
     }
 
     async componentDidMount() {
         await this.props.fetchShowsWithRedux();
         await this.fetchPosters();
-        this.setState(() => ({ // does not wait fetching all posters
-            contentReady: true
-        }));
-        console.log(this.state.contentReady);
+        this.setState({ contentReady: true });
+        // console.log(this.state.contentReady);
     }
 
-    fetchPosters = () => {
+    fetchPosters = async () => {
         const shows = store.getState().showsState.shows || [];
         const posters = store.getState().postersState.posters;
-        shows.forEach( (show) => {
+        // TODO: store max count of posters async load calls
+        await shows.forEach( (show) => {
             if (posters)
             {
                 if (posters.filter((item) => +item.poster.thetvdb_id === show.ids.tvdb).length !== 0){
@@ -141,32 +139,30 @@ class App extends React.Component {
 
     fetchShowsByTitle = (title) => {
         clearTimeout(this.typingTimer);
-        if (title) {
-            this.typingTimer = setTimeout(
-                async () => {
-                    this.generateTitleQuery(title);
-                    this.generatePageQuery(1);
-                    const options = store.getState().queryState.queries;
-                    console.log(options);
-                    await this.props.fetchShowsWithRedux(options);
-                    this.fetchPosters();
-                }, 1000);
-        }
+        this.typingTimer = setTimeout(
+            async () => {
+                this.generateTitleQuery(title);
+                this.generatePageQuery(1);
+                const options = store.getState().queryState.queries;
+                await this.props.fetchShowsWithRedux(options);
+                this.fetchPosters();
+            }, 1000);
     }
 
     fetchShowsByYear = (year) => {
         clearTimeout(this.typingTimer);
-        if (year) {
-            this.typingTimer = setTimeout(
-                async () => {
+        this.typingTimer = setTimeout(
+            async () => {
+                if (isNaN(year)) {
+                    alert("Sorry. There should be a four-digit-number!")
+                } else {
                     this.generateYearQuery(year);
                     this.generatePageQuery(1);
                     const options = store.getState().queryState.queries;
-                    console.log(options);
                     await this.props.fetchShowsWithRedux(options);
                     this.fetchPosters();
-                }, 1000);
-        }
+                }
+            }, 1000);
     }
 
     fetchShowsBySorting = async (sorting) => {
@@ -186,9 +182,11 @@ class App extends React.Component {
 
     fetchShowsByEnteredPage = (page) => {
         clearTimeout(this.typingTimer);
-        if (page) {
-            this.typingTimer = setTimeout(
-                async () => {
+        this.typingTimer = setTimeout(
+            async () => {
+                if (isNaN(page)) {
+                    alert("Sorry. There should be a number!")
+                } else {
                     const lastPage = +store.getState().queryState.queries.pagesTotal;
                     page = +page > lastPage ? lastPage : page;
                     page = +page < 1 ? 1 : page;
@@ -196,8 +194,8 @@ class App extends React.Component {
                     let options = store.getState().queryState.queries;
                     await this.props.fetchShowsWithRedux(options);
                     this.fetchPosters();
-                }, 1000);
-        }
+                }
+            }, 1000);
     }
 
     render(){
@@ -227,11 +225,12 @@ class App extends React.Component {
                     <Shows
                         posters={this.props.posters}
                         shows={this.props.shows}
+                        queries={this.props.queries}
                     />
                 </table>
                 <Pagination
                     fetchShowsByPage={this.fetchShowsByPage}
-                    fetchShowsByPageDelayed={this.fetchShowsByPageDelayed}
+                    fetchShowsByEnteredPage={this.fetchShowsByEnteredPage}
                 />
             </div>
         )

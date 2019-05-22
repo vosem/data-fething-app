@@ -9,6 +9,7 @@ class Pagination extends React.Component {
 
     render() {
         let lastPage = this.props.queries && this.props.queries.pagesTotal || 1;
+        lastPage = this.props.queries && +this.props.queries.pagesTotal === 0 ? 1 : lastPage;
         let currentPage = this.props.queries && this.props.queries.page || 1;
         let placeholder = `Current page: ${currentPage}`;
         return (
@@ -23,7 +24,9 @@ class Pagination extends React.Component {
                 <button
                     disabled={currentPage === "1"}
                     onClick={() => {this.props.fetchShowsByPage(1); this.clearInput()}}
-                >1</button>
+                >
+                    1
+                </button>
                 <input
                     ref="currentPageInput"
                     type="text"
@@ -31,9 +34,9 @@ class Pagination extends React.Component {
                     onFocus={(e) => e.target.placeholder = ""}
                     onBlur={(e) => e.target.placeholder = placeholder}
                     onKeyUp={event => {
-                        this.props.fetchShowsByEnteredPage(event.target.value);
-                        setTimeout(()=>{
-                            this.clearInput();
+                            this.props.fetchShowsByEnteredPage(event.target.value);
+                            setTimeout(() => {
+                                this.clearInput();
                             }, 5000)
                         }
                     }

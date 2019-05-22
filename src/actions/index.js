@@ -56,18 +56,6 @@ function generatePageQuery(payload) {
         payload
     }
 }
-function generatePrevPageQuery(payload) {
-    return {
-        type: "GENERATE_PREV_PAGE_QUERY",
-        payload
-    }
-}
-function generateNextPageQuery(payload) {
-    return {
-        type: "GENERATE_NEXT_PAGE_QUERY",
-        payload
-    }
-}
 export {
     fetchShowsError,
     fetchPosterSuccess,
@@ -76,8 +64,6 @@ export {
     generateYearQuery,
     generateSortingQuery,
     generatePageQuery,
-    generatePrevPageQuery,
-    generateNextPageQuery,
     fetchCurrentPage,
     fetchPagesTotal
 }
