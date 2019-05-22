@@ -11,8 +11,8 @@ function Show (props){
                     src={props.posterUrl}
                     alt={props.posterAlt}
                     height="50px"
-                    onLoad={props.load.bind(this)}
-                    onError={props.load.bind(this)}
+                    // onLoad={props.load.bind(this)}
+                    // onError={props.load.bind(this)}
                 />
             </td>
             <td className="title">{props.show.title}</td>
@@ -27,7 +27,6 @@ Show.propTypes = {
     posterUrl: PropTypes.string,
     posterAlt: PropTypes.string,
     show: PropTypes.object
-
 };
 
 export default Show;

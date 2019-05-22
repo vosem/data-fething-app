@@ -9,7 +9,7 @@ function SearchByYear(props){
             placeholder={ 'Year' }
             onFocus={ event => event.target.placeholder = "" }
             onBlur={ event => event.target.placeholder = "Year" }
-            onKeyUp={ event => props.fetchShowsByYear(event.target.value) }
+            onKeyUp={ event => props.onYearChange(event.target.value) }
         />
     );
 }

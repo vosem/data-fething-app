@@ -7,8 +7,7 @@ function SortShows (props){
             className="sort-shows"
             name = "sortShows"
             defaultValue={"popular"}
-            onChange={event => props.fetchShowsBySorting(event.target.value) }
-            style={{width: 100 + '%'}}
+            onChange={ event => props.onSortingChange(event.target.value) }
         >
             <option value={"popular"}>popular</option>
             <option value={"trending"}>trending</option>

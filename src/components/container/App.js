@@ -1,5 +1,5 @@
 import React from 'react';
-import store from '../store/index';
+import store from '../../store';
 import {connect} from 'react-redux';
 import {
     fetchShowsSuccess,
@@ -12,13 +12,9 @@ import {
     fetchPagesTotal,
     generateSortingQuery,
     generatePageQuery
-} from '../actions';
-import SearchByTitle from "./SearchByTitle";
-import SearchByYear from "./SearchByYear";
-import SortShows from "./SortShows";
-import Pagination from "./Pagination";
-import Shows from "./Shows";
-import './App.css';
+} from '../../actions';
+import Pagination from "../presentational/Pagination";
+import ShowsTable from "../presentational/ShowsTable";
 
 async function fetchShows(options) {
 
@@ -99,7 +95,7 @@ function fetchPosterWithRedux(showId) {
         } catch (e) {
             dispatch(fetchPosterError());
         }
-        // TODO: decrement store count of posters async load calls
+        // TODO: optionally - decrement store count of posters async load calls
     }
 }
 
@@ -126,7 +122,7 @@ class App extends React.Component {
     fetchPosters = async () => {
         const shows = store.getState().showsState.shows || [];
         const posters = store.getState().postersState.posters;
-        // TODO: store max count of posters async load calls
+        // TODO: optionally - store max count of posters async load calls
         await shows.forEach( (show) => {
             if (posters)
             {
@@ -146,7 +142,7 @@ class App extends React.Component {
                 const options = store.getState().queryState.queries;
                 await this.props.fetchShowsWithRedux(options);
                 this.fetchPosters();
-            }, 1000);
+            }, 500);
     }
 
     fetchShowsByYear = (year) => {
@@ -162,7 +158,7 @@ class App extends React.Component {
                     await this.props.fetchShowsWithRedux(options);
                     this.fetchPosters();
                 }
-            }, 1000);
+            }, 500);
     }
 
     fetchShowsBySorting = async (sorting) => {
@@ -173,64 +169,44 @@ class App extends React.Component {
         this.fetchPosters();
     }
 
-    fetchShowsByPage = async (page) => {
-        this.props.generatePageQuery(page);
+    get pageCurrent () {
+        const {queries} = store.getState().queryState || {};
+        const {page} = queries || {};
+        return +page || 1;
+    }
+    get pagesTotal () {
+        const {queries} = store.getState().queryState || {};
+        const {pagesTotal} = queries || {};
+        return +pagesTotal || 1;
+    }
+
+    fetchShowsByPage = async (pageIndex) => {
+        this.props.generatePageQuery(pageIndex);
         const options = store.getState().queryState.queries;
         await this.props.fetchShowsWithRedux(options);
         this.fetchPosters();
-    }
-
-    fetchShowsByEnteredPage = (page) => {
-        clearTimeout(this.typingTimer);
-        this.typingTimer = setTimeout(
-            async () => {
-                if (isNaN(page)) {
-                    alert("Sorry. There should be a number!")
-                } else {
-                    const lastPage = +store.getState().queryState.queries.pagesTotal;
-                    page = +page > lastPage ? lastPage : page;
-                    page = +page < 1 ? 1 : page;
-                    this.generatePageQuery(page);
-                    let options = store.getState().queryState.queries;
-                    await this.props.fetchShowsWithRedux(options);
-                    this.fetchPosters();
-                }
-            }, 1000);
     }
 
     render(){
         return (
             <div>
                 <Pagination
-                    fetchShowsByPage={this.fetchShowsByPage}
-                    fetchShowsByEnteredPage={this.fetchShowsByEnteredPage}
+                    currentPage={ this.pageCurrent }
+                    pagesTotal={ this.pagesTotal }
+                    onChange={ this.fetchShowsByPage }
                 />
-                <table>
-                    <thead>
-                        <tr>
-                            <td colSpan="2">
-                                <SortShows fetchShowsBySorting={this.fetchShowsBySorting} />
-                            </td>
-                            <td>
-                                <SearchByTitle fetchShowsByTitle={this.fetchShowsByTitle} />
-                            </td>
-                            <td>Rank</td>
-                            <td>
-                                <SearchByYear fetchShowsByYear={this.fetchShowsByYear} />
-                            </td>
-                            <td>TVDB Id</td>
-                            <td>No of<br/>Episodes</td>
-                        </tr>
-                    </thead>
-                    <Shows
-                        posters={this.props.posters}
-                        shows={this.props.shows}
-                        queries={this.props.queries}
-                    />
-                </table>
+                <ShowsTable
+                    posters={this.props.posters}
+                    shows={this.props.shows}
+                    queries={this.props.queries}
+                    onSortingChange={this.fetchShowsBySorting}
+                    onTitleChange={this.fetchShowsByTitle}
+                    onYearChange={this.fetchShowsByYear}
+                />
                 <Pagination
-                    fetchShowsByPage={this.fetchShowsByPage}
-                    fetchShowsByEnteredPage={this.fetchShowsByEnteredPage}
+                    currentPage={ this.pageCurrent }
+                    pagesTotal={ this.pagesTotal }
+                    onChange={ this.fetchShowsByPage.bind(this) }
                 />
             </div>
         )
