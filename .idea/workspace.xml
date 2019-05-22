@@ -1,33 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5d5365fa-5ffd-446f-85dc-fd0bac970c98" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/components/presentational/Pagination.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/presentational/SearchByTitle.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/presentational/ShowsTable.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/presentational/ShowsTable.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/App.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/container/App.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/App.styl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Pagination.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/Pagination.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Pagination.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Pagination.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/Pagination.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SearchByTitle.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/SearchByTitle.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SearchByTitle.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SearchByTitle.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/SearchByTitle.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SearchByYear.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/SearchByYear.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SearchByYear.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/SearchByYear.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SearchByYear.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/SearchByYear.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Show.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/Show.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Show.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/Show.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Show.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/Show.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Shows.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/Shows.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SortShows.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/SortShows.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SortShows.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/SortShows.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SortShows.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/presentational/SortShows.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
-    </list>
+    <list default="true" id="5d5365fa-5ffd-446f-85dc-fd0bac970c98" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
     <ignored path="$PROJECT_DIR$/tmp/" />
@@ -38,53 +12,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/components/container/App.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="482">
-              <caret line="182" column="45" selection-start-line="182" selection-start-column="45" selection-end-line="182" selection-end-column="45" />
-              <folding>
-                <element signature="e#0#26#0" expanded="true" />
-                <element signature="n#!!block;n#fetchShows#0" />
-                <element signature="n#!!block;n#fetchPoster#0" />
-                <element signature="n#!!block;n#fetchShowsWithRedux#0" />
-                <element signature="n#!!block;n#fetchPosterWithRedux#0" />
-                <element signature="n#!!block;n#componentDidMount#0;n#App#0" />
-                <element signature="e#4554#5135#0" />
-                <element signature="e#6211#6454#0" />
-                <element signature="n#!!block;n#pageCurrent#0;n#App#0" />
-                <element signature="n#!!block;n#pagesTotal#0;n#App#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/components/presentational/Pagination.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="604">
-              <caret line="38" column="65" lean-forward="true" selection-start-line="38" selection-start-column="65" selection-end-line="38" selection-end-column="65" />
-              <folding>
-                <element signature="e#0#26#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/components/presentational/Shows.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="254">
-              <caret line="21" column="79" selection-start-line="21" selection-start-column="79" selection-end-line="21" selection-end-column="79" />
-              <folding>
-                <element signature="e#0#26#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -201,31 +129,6 @@
               <item name="data-fetching-app" type="462c0819:PsiDirectoryNode" />
               <item name="public" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="data-fetching-app" type="b2602c69:ProjectViewProjectNode" />
-              <item name="data-fetching-app" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="data-fetching-app" type="b2602c69:ProjectViewProjectNode" />
-              <item name="data-fetching-app" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="components" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="data-fetching-app" type="b2602c69:ProjectViewProjectNode" />
-              <item name="data-fetching-app" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="components" type="462c0819:PsiDirectoryNode" />
-              <item name="container" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="data-fetching-app" type="b2602c69:ProjectViewProjectNode" />
-              <item name="data-fetching-app" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="components" type="462c0819:PsiDirectoryNode" />
-              <item name="presentational" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -296,12 +199,12 @@
       <workItem from="1557982376186" duration="23519000" />
       <workItem from="1558069018952" duration="51734000" />
       <workItem from="1558414685089" duration="22228000" />
-      <workItem from="1558501011397" duration="16697000" />
+      <workItem from="1558501011397" duration="17741000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="329024000" />
+    <option name="totallyTimeSpent" value="330068000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="963" extended-state="6" />
@@ -400,13 +303,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/temp" />
-    <entry file="file://$PROJECT_DIR$/src/index.styl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="42" selection-start-line="2" selection-start-column="42" selection-end-line="2" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/store/index.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
@@ -557,6 +453,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/index.styl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="42" selection-start-line="2" selection-start-column="42" selection-end-line="2" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/components/presentational/Pagination.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="38" column="65" lean-forward="true" selection-start-line="38" selection-start-column="65" selection-end-line="38" selection-end-column="65" />
+          <folding>
+            <element signature="e#0#26#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/components/container/App.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="482">
@@ -572,16 +485,6 @@
             <element signature="e#6211#6454#0" />
             <element signature="n#!!block;n#pageCurrent#0;n#App#0" />
             <element signature="n#!!block;n#pagesTotal#0;n#App#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/components/presentational/Pagination.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="604">
-          <caret line="38" column="65" lean-forward="true" selection-start-line="38" selection-start-column="65" selection-end-line="38" selection-end-column="65" />
-          <folding>
-            <element signature="e#0#26#0" expanded="true" />
           </folding>
         </state>
       </provider>
